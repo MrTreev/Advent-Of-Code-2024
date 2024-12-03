@@ -1,3 +1,5 @@
+.EXPORT_ALL_VARIABLES:
+
 CXX			=	clang++
 CXXLIB		=	libstdc++
 RTLIB		=	compiler-rt

@@ -1,8 +1,9 @@
+.EXPORT_ALL_VARIABLES:
 include Makefile.defs
 
 SRC_FILES	=	$(shell find ${PATH_SRC} -type f -name '*.cpp')
-BIN_FILES	=	$(patsubst ${PATH_SRC}%.cpp,${PATH_BIN}%,${SRC_FILES})
-TST_FILES	=	$(patsubst ${PATH_SRC}%.cpp,${PATH_BIN}%,${SRC_FILES})
+BIN_FILES	=	$(patsubst ${PATH_SRC}/%.cpp,${PATH_BIN}/%,${SRC_FILES})
+TST_FILES	=	$(patsubst ${PATH_SRC}/%.cpp,${PATH_BIN}/%,${SRC_FILES})
 
 ${BIN_FILES}: ${SRC_FILES}
 	${CPP} ${CXX_FLAGS} $< -o $@

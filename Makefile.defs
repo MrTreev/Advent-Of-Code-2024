@@ -3,7 +3,7 @@
 
 COMPILER	=	clang
 
-PROJECT	=	$(shell git rev-parse --show-toplevel)
+PROJECT		=	$(shell git rev-parse --show-toplevel)
 
 PATH_SRC	=	${PROJECT}/src
 PATH_ETC	=	${PROJECT}/etc
