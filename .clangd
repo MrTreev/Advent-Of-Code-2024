@@ -2,8 +2,7 @@ Index:
   Background: Build
   StandardLibrary: True
 CompileFlags:
-  Add: ["-Isrc", "-DRAYGAME_ENABLE_TESTS", "-I../etc/doctest"]
-  CompilationDatabase: build
+  Add: ["-iquotesrc"]
 Style:
   FullyQualifiedNamespaces: True
 Diagnostics:

@@ -1,6 +1,7 @@
 # C/C++
-tst/
-bin/
+out/
+compile_commands.json
+.cache/
 *.a
 *.app
 *.d

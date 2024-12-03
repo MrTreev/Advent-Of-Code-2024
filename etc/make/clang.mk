@@ -1,10 +1,11 @@
 .EXPORT_ALL_VARIABLES:
 
 CXX			=	clang++
+
 CXXLIB		=	libstdc++
 RTLIB		=	compiler-rt
 
-CXXFLAGS	+=	-rtlib=${RTLIB}
+CXXFLAGS	+=	-std=c++23
 CXXFLAGS	+=	-iquote${PATH_SRC}
 CXXFLAGS	+=	-Weverything
 CXXFLAGS	+=	-pedantic

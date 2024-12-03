@@ -1,29 +1,36 @@
-#include "utility/types.h"
+#include "util.h"
 #include <algorithm>
-#include <filesystem>
-#include <fstream>
 #include <iostream>
 #include <vector>
 
 int main() {
-    const auto    filename = std::filesystem::absolute("day1.txt");
-    std::ifstream in_stream{filename};
+    std::ifstream        in_stream{aoc::file::day_stream(1)};
+    std::vector<int64_t> left;
+    std::vector<int64_t> right;
 
-    std::vector<uint32_t> left;
-    std::vector<uint32_t> right;
-
-    uint32_t a, b;
+    int64_t a;
+    int64_t b;
     while (in_stream >> a >> b) {
         left.push_back(a);
         right.push_back(b);
     }
-    std::sort(left.begin(), left.end());
-    std::sort(right.begin(), right.end());
 
-    size_t       sum     = 0;
-    const size_t vecsize = left.size();
+    const size_t         vecsize{left.size()};
+    std::vector<int64_t> left_sorted{left};
+    std::vector<int64_t> right_sorted{right};
+    std::sort(left_sorted.begin(), left_sorted.end());
+    std::sort(right_sorted.begin(), right_sorted.end());
+
+    int64_t part1{0};
     for (size_t i = 0; i < vecsize; ++i) {
-        sum += (left[i] + right[i]);
+        part1 += std::abs(left[i] - right[i]);
     }
-    std::cout << "Sum: " << std::to_string(sum) << std::endl;
+
+    int64_t part2{0};
+    for (const int64_t lval: left) {
+        part2 += (lval * std::count(right.begin(), right.end(), lval));
+    }
+
+    aoc::output::print_part(1, part1);
+    aoc::output::print_part(2, part2);
 }

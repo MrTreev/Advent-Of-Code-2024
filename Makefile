@@ -1,26 +1,29 @@
 .EXPORT_ALL_VARIABLES:
 include Makefile.defs
 
-SRC_FILES	=	$(shell find ${PATH_SRC} -type f -name '*.cpp')
-BIN_FILES	=	$(patsubst ${PATH_SRC}/%.cpp,${PATH_BIN}/%,${SRC_FILES})
-TST_FILES	=	$(patsubst ${PATH_SRC}/%.cpp,${PATH_BIN}/%,${SRC_FILES})
+${BLD_FILES}: ${PATH_BLD}/%.o: ${PATH_SRC}/%.cpp
+	@mkdir -p $(dir $@)
+	@${CXX} ${CXXFLAGS} -o $@ -c $<
+	@chmod +x $@
 
-${BIN_FILES}: ${SRC_FILES}
-	${CPP} ${CXX_FLAGS} $< -o $@
+${PATH_BIN}/day%: ${PATH_BLD}/day%.o ${PATH_BLD}/util.o
+	@mkdir -p $(dir $@)
+	@${CXX} $^ -o $@
+
 
 .PHONY: all
-all: ${BIN_FILES} echo
+all: ${BIN_FILES} test run
 
-.PHONY: echo
-echo:
-	@echo SRC_FILES: "${SRC_FILES}"
-	@echo BIN_FILES: "${BIN_FILES}"
-	@echo TST_FILES: "${TST_FILES}"
+.PHONY: test
+test: ${TST_FILES}
+${TST_FILES}: ${PATH_TST}/%: ${PATH_TXT}/%
+	@mkdir -p $(dir $@)
+	@cp $< $@
 
-
-# .PHONY: test
-# test: ${TST_FILES}
+.PHONY: run
+run: ${BIN_FILES}
+	@$<
 
 .PHONY: clean
 clean:
-	@rm -rf ${OUT_PATH}
+	@rm -rf ${PATH_OUT}
