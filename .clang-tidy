@@ -1,0 +1,20 @@
+---
+Checks:
+  - 'bugprone-*'
+  - 'clang-analyzer-*'
+  - 'clang-diagnostic-*'
+  - 'concurrency-*'
+  - 'cppcoreguidelines-*'
+  - 'hicpp-*'
+  - 'misc-*'
+  - 'modernize-*'
+  - 'performance-*'
+  - 'portability-*'
+  - 'readability-*'
+  - '-bugprone-easily-swappable-parameters'
+  - '-*-use-trailing-return-type'
+WarningsAsErrors: ''
+AnalyzeTemporaryDtors: false
+SystemHeaders:   false
+CheckOptions:
+    readability-identifier-naming.MemberPrefix: 'm_'

@@ -1,0 +1,16 @@
+Index:
+  Background: Build
+  StandardLibrary: True
+CompileFlags:
+  Add: ["-Isrc", "-DRAYGAME_ENABLE_TESTS", "-I../etc/doctest"]
+  CompilationDatabase: build
+Style:
+  FullyQualifiedNamespaces: True
+Diagnostics:
+  ClangTidy:
+    FastCheckFilter: None
+  UnusedIncludes: Strict
+  Includes:
+    MissingIncludes: Strict
+Hover:
+  ShowAKA: True

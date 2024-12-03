@@ -1,0 +1,25 @@
+.EXPORT_ALL_VARIABLES:
+.DELETE_ON_ERROR:
+
+COMPILER	=	clang
+
+PROJECT	=	$(shell git rev-parse --show-toplevel)
+
+PATH_SRC	=	${PROJECT}/src
+PATH_ETC	=	${PROJECT}/etc
+PATH_TXT	=	${PROJECT}/txt
+PATH_OUT	=	${PROJECT}/out
+PATH_BLD	=	${OUT_PATH}/build
+PATH_BIN	=	${OUT_PATH}/bin
+PATH_MAK	=	${PATH_ETC}/make
+
+
+ifeq (${COMPILER}, clang)
+	include ${PATH_MAK}/clang.mk
+endif
+ifeq (${COMPILER}, gcc)
+	include ${PATH_MAK}/gcc.mk
+endif
+ifeq (${COMPILER}, tcc)
+	include ${PATH_MAK}/tcc.mk
+endif
