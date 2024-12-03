@@ -1,5 +1,6 @@
 # C/C++
 out/
+txt/
 compile_commands.json
 .cache/
 *.a

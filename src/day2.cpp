@@ -39,6 +39,9 @@ static std::vector<int> vec_except(const std::vector<int>& vec, size_t idx) {
 }
 
 static bool subone_good(const std::vector<int>& vec) {
+    if (all_good(vec)) {
+        return true;
+    }
     for (size_t i = 1; i < vec.size(); ++i) {
         if ((badtst(vec[i - 1], vec[i])) && (!all_good(vec_except(vec, i)))) {
             return false;
