@@ -6,7 +6,7 @@ Standard: Latest
 InsertNewlineAtEOF: true
 KeepEmptyLinesAtEOF: false
 
-ColumnLimit: 80
+ColumnLimit: 100
 IndentWidth: 4
 TabWidth: 4
 UseTab: Never

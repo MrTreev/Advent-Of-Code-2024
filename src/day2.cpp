@@ -9,10 +9,7 @@ static bool badtst(const int a, const int b) {
 }
 
 static bool is_sorted_one_way(const std::vector<int>& vec) {
-    return (
-        std::is_sorted(vec.cbegin(), vec.cend())
-        || std::is_sorted(vec.crbegin(), vec.crend())
-    );
+    return (std::is_sorted(vec.cbegin(), vec.cend()) || std::is_sorted(vec.crbegin(), vec.crend()));
 }
 
 static bool all_good(const std::vector<int>& vec) {
@@ -50,10 +47,8 @@ static bool subone_good(const std::vector<int>& vec) {
     return true;
 }
 
-int main() {
-    auto   in_stream{aoc::file::day_stream(2)};
-    size_t part1{0};
-    size_t part2{0};
+void aoc::run() {
+    auto in_stream{aoc::file::day_stream(2)};
 
     std::string      line;
     std::string      item;
@@ -66,13 +61,10 @@ int main() {
             items.push_back(std::stoi(item));
         }
         if (all_good(items)) {
-            part1 += 1;
+            aoc::part1 += 1;
         }
         if (subone_good(items)) {
-            part2 += 1;
+            aoc::part2 += 1;
         }
     }
-
-    aoc::output::print_part(1, part1);
-    aoc::output::print_part(2, part2);
 }

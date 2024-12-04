@@ -1,11 +1,12 @@
 #pragma once
+#include <cstdarg>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <cxxabi.h>
 #include <filesystem>
+#include <format>
 #include <fstream>
-#include <iostream>
 #include <string>
 #include <typeinfo>
 
@@ -30,9 +31,20 @@ using std::ptrdiff_t;
 using std::size_t;
 
 namespace aoc {
-template<typename... Args>
-void print(std::format_string<Args...> fst, Args... args) {
-    std::println(std::cout, fst, std::forward<Args...>(args)...);
+void          run(); // Use this to run your day's code
+extern size_t part1;
+extern size_t part2;
+extern bool   test_mode;
+
+void print(const std::string& str);
+void debug(const std::string& str);
+
+void print(std::string_view fst, auto&&... args) {
+    print(std::string(std::vformat(fst, std::make_format_args(args...))));
+}
+
+void debug(std::string_view fst, auto&&... args) {
+    debug(std::string(std::vformat(fst, std::make_format_args(args...))));
 }
 
 namespace file {
@@ -42,24 +54,29 @@ std::ifstream         day_stream(uint8_t day);
 } // namespace file
 
 namespace output {
-void print_part(uint8_t num, const auto& part) {
-    std::println(std::cout, "Part {}: {}", num, part);
-}
+void print_part(uint8_t num, const size_t& part);
 } // namespace output
 
-namespace debug {
+namespace string {
+std::string slurp(std::ifstream& in);
+
+bool is_numeric(const std::string& str);
+} // namespace string
+
+namespace math {
+size_t max(size_t a, size_t b);
+size_t min(size_t a, size_t b);
+size_t max(size_t a, size_t b, size_t args...);
+size_t min(size_t a, size_t b, size_t args...);
+} // namespace math
+
+namespace types {
 std::string type_name(auto item) {
-    char* demangled_name =
-        abi::__cxa_demangle(typeid(item).name(), nullptr, nullptr, nullptr);
+    char* demangled_name = abi::__cxa_demangle(typeid(item).name(), nullptr, nullptr, nullptr);
     std::string ret_name{demangled_name};
     free(demangled_name);
     return ret_name;
 }
-} // namespace debug
-
-namespace string {
-void clean_string(std::string& str);
-void remove_duplicates(std::string& str);
-} // namespace string
+} // namespace types
 
 } // namespace aoc
