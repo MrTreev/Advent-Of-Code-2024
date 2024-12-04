@@ -5,10 +5,10 @@ COMPILER	=	clang
 
 PROJECT		=	${PWD}
 
-PATH_SRC	=	src
-PATH_ETC	=	etc
-PATH_TXT	=	txt
-PATH_OUT	=	out
+PATH_SRC	=	${PROJECT}/src
+PATH_ETC	=	${PROJECT}/etc
+PATH_TXT	=	${PROJECT}/txt
+PATH_OUT	=	${PROJECT}/out
 PATH_BLD	=	${PATH_OUT}/build
 PATH_BIN	=	${PATH_OUT}/bin
 PATH_TST	=	${PATH_OUT}/test

@@ -14,7 +14,6 @@ Checks:
   - '-bugprone-easily-swappable-parameters'
   - '-*-use-trailing-return-type'
 WarningsAsErrors: ''
-AnalyzeTemporaryDtors: false
 SystemHeaders:   false
 CheckOptions:
     readability-identifier-naming.MemberPrefix: 'm_'

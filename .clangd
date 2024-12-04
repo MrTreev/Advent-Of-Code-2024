@@ -1,15 +1,11 @@
 Index:
   Background: Build
   StandardLibrary: True
-CompileFlags:
-  Add: ["-iquotesrc"]
 Style:
   FullyQualifiedNamespaces: True
 Diagnostics:
   ClangTidy:
     FastCheckFilter: None
   UnusedIncludes: Strict
-  Includes:
-    MissingIncludes: Strict
 Hover:
   ShowAKA: True

@@ -58,23 +58,23 @@ void print_part(uint8_t num, const size_t& part);
 } // namespace output
 
 namespace string {
-std::string slurp(std::ifstream& in);
+std::string slurp(std::ifstream instr);
 
 bool is_numeric(const std::string& str);
 } // namespace string
 
 namespace math {
-size_t max(size_t a, size_t b);
-size_t min(size_t a, size_t b);
-size_t max(size_t a, size_t b, size_t args...);
-size_t min(size_t a, size_t b, size_t args...);
+size_t max(size_t aval, size_t bval);
+size_t min(size_t aval, size_t bval);
+size_t max(size_t aval, size_t bval, size_t args...);
+size_t min(size_t aval, size_t bval, size_t args...);
 } // namespace math
 
 namespace types {
 std::string type_name(auto item) {
     char* demangled_name = abi::__cxa_demangle(typeid(item).name(), nullptr, nullptr, nullptr);
     std::string ret_name{demangled_name};
-    free(demangled_name);
+    free(demangled_name); //NOLINT(*-no-malloc,cppcoreguidelines-owning-memory)
     return ret_name;
 }
 } // namespace types

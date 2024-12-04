@@ -7,12 +7,12 @@ size_t aoc::part1{0};
 size_t aoc::part2{0};
 
 void aoc::print(const std::string& str) {
-    std::cout << str << std::endl;
+    std::cout << str << '\n';
 }
 
 void aoc::debug(const std::string& str) {
     if (aoc::test_mode) {
-        std::cout << str << std::endl;
+        std::cout << str << '\n';
     }
 }
 
@@ -35,30 +35,30 @@ void aoc::output::print_part(uint8_t num, const size_t& part) {
 }
 
 bool aoc::string::is_numeric(const std::string& str) {
-    return std::all_of(str.cbegin(), str.cend(), [](const char& c) {
-        return (c >= '0' && c <= '9');
+    return std::all_of(str.cbegin(), str.cend(), [](const char& cha) {
+        return (cha >= '0' && cha <= '9');
     });
 }
 
-size_t aoc::math::max(size_t a, size_t b) {
-    return std::max(a, b);
+size_t aoc::math::max(size_t aval, size_t bval) {
+    return std::max(aval, bval);
 }
 
-size_t aoc::math::min(size_t a, size_t b) {
-    return std::min(a, b);
+size_t aoc::math::min(size_t aval, size_t bval) {
+    return std::min(aval, bval);
 }
 
-size_t aoc::math::max(size_t a, size_t b, size_t args...) {
-    return max(std::max(a, b), args);
+size_t aoc::math::max(size_t aval, size_t bval, size_t args...) {
+    return max(std::max(aval, bval), args);
 }
 
-size_t aoc::math::min(size_t a, size_t b, size_t args...) {
-    return min(std::min(a, b), args);
+size_t aoc::math::min(size_t aval, size_t bval, size_t args...) {
+    return min(std::min(aval, bval), args);
 }
 
-std::string aoc::string::slurp(std::ifstream& in) {
+std::string aoc::string::slurp(std::ifstream instr) {
     std::ostringstream sstr;
-    sstr << in.rdbuf();
+    sstr << instr.rdbuf();
     return sstr.str();
 }
 

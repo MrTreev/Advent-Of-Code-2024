@@ -2,6 +2,9 @@
 include Makefile.defs
 
 CXXFLAGS += -g -ggdb
+LD = clang++
+LDFLAGS += -lc
+LDFLAGS += -lstdc++
 
 .PHONY: all
 all: text ${BIN_FILES}
@@ -12,7 +15,7 @@ ${BLD_FILES}: ${PATH_BLD}/%.o: ${PATH_SRC}/%.cpp
 
 ${PATH_BIN}/day%: ${PATH_BLD}/day%.o ${PATH_BLD}/util.o
 	@mkdir -p $(dir $@)
-	@${CXX} -o $@ $^
+	@${LD} ${CXXFLAGS} ${LDFLAGS} -o $@ $^
 
 .PHONY: test
 text: ${TST_FILES}
