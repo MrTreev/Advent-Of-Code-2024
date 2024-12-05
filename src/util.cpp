@@ -2,23 +2,31 @@
 #include <algorithm>
 #include <iostream>
 
+// NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
 bool   aoc::test_mode;
 size_t aoc::part1{0};
 size_t aoc::part2{0};
 
+// NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
+
 void aoc::print(const std::string& str) {
-    std::cout << str << '\n';
+    std::cout << str << std::endl; //NOLINT(performance-avoid-endl)
 }
 
 void aoc::debug(const std::string& str) {
     if (aoc::test_mode) {
-        std::cout << str << '\n';
+        std::cout << str << std::endl; //NOLINT(performance-avoid-endl)
     }
 }
 
 std::string aoc::file::day_txt(uint8_t day) {
     const std::string filename = std::format("out/test/day{}.txt", day);
-    std::println(std::cout, "Advent of Code Day {}, filename: {}", day, filename);
+    std::println(
+        std::cout,
+        "Advent of Code Day {}, filename: {}",
+        day,
+        filename
+    );
     return filename;
 }
 

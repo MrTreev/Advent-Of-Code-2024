@@ -32,9 +32,11 @@ using std::size_t;
 
 namespace aoc {
 void          run(); // Use this to run your day's code
+// NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
 extern size_t part1;
 extern size_t part2;
 extern bool   test_mode;
+// NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
 
 void print(const std::string& str);
 void debug(const std::string& str);
@@ -46,6 +48,12 @@ void print(std::string_view fst, auto&&... args) {
 void debug(std::string_view fst, auto&&... args) {
     debug(std::string(std::vformat(fst, std::make_format_args(args...))));
 }
+
+template<typename T>
+struct Vec2 {
+    T m_x;
+    T m_y;
+};
 
 namespace file {
 std::string           day_txt(uint8_t day);
@@ -72,7 +80,8 @@ size_t min(size_t aval, size_t bval, size_t args...);
 
 namespace types {
 std::string type_name(auto item) {
-    char* demangled_name = abi::__cxa_demangle(typeid(item).name(), nullptr, nullptr, nullptr);
+    char* demangled_name =
+        abi::__cxa_demangle(typeid(item).name(), nullptr, nullptr, nullptr);
     std::string ret_name{demangled_name};
     free(demangled_name); //NOLINT(*-no-malloc,cppcoreguidelines-owning-memory)
     return ret_name;

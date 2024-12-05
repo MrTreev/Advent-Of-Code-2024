@@ -1,7 +1,11 @@
 #include "util.h"
 #include <cassert>
 #include <cstddef>
+#include <stdexcept>
 #include <string>
+#include <type_traits>
+#include <utility>
+
 #define AOC_UBU(x)                                                             \
     _Pragma("clang diagnostic push")                                           \
         _Pragma("clang diagnostic ignored \"-Wunsafe-buffer-usage\"")          \
@@ -28,6 +32,27 @@ enum Direction : uint8_t {
     NW = 0b1001,
 };
 
+std::string to_string(Direction dir) {
+    switch (dir) {
+    case N:
+        return "N ";
+    case NE:
+        return "NE";
+    case E:
+        return "E ";
+    case SE:
+        return "SE";
+    case S:
+        return "S ";
+    case SW:
+        return "SW";
+    case W:
+        return "W ";
+    case NW:
+        return "NW";
+    }
+}
+
 constexpr std::array<Direction, 8> DIRECTIONS{
     {
      N, NE,
@@ -37,32 +62,71 @@ constexpr std::array<Direction, 8> DIRECTIONS{
      }
 };
 
+bool north(Direction dir) {
+    return (dir & Direction::N) != 0;
+}
+
+bool south(Direction dir) {
+    return (dir & Direction::S) != 0;
+}
+
+bool east(Direction dir) {
+    return (dir & Direction::E) != 0;
+}
+
+bool west(Direction dir) {
+    return (dir & Direction::W) != 0;
+}
+
+auto to_unsigned(auto val) {
+    static_assert(std::is_signed_v<decltype(val)>);
+    if (val < 0) {
+        throw std::runtime_error(
+            std::format("Could not make convert {} to unsigned", val)
+        );
+    }
+    return static_cast<std::make_unsigned_t<decltype(val)>>(val);
+}
+
 class WordSearch {
 private:
     std::array<char, WIDTH * HEIGHT> m_buffer{};
 
     static size_t idx(size_t row, size_t col) {
-        return (row * WIDTH) + col;
+        if (std::cmp_greater(row, HEIGHT)) {
+            throw std::runtime_error(
+                std::format("row {} out of bounds, max: {}", row, HEIGHT)
+            );
+        }
+        if (std::cmp_greater(col, WIDTH)) {
+            throw std::runtime_error(
+                std::format("col {} out of bounds, max: {}", col, WIDTH)
+            );
+        }
+        return (static_cast<size_t>(row) * WIDTH) + static_cast<size_t>(col);
     }
 
-    char get_item(const size_t row, const size_t col) {
-        // NOLINTBEGIN(cppcoreguidelines-pro-bounds-constant-array-index)
-        return m_buffer[idx(row, col)];
-        // NOLINTEND(cppcoreguidelines-pro-bounds-constant-array-index)
+    [[nodiscard]]
+    std::string get_line(size_t row) const {
+        return {&m_buffer[idx(row, 0)], WIDTH};
     }
 
 public:
+    WordSearch() {
+        m_buffer.fill('.');
+    }
+
     explicit WordSearch(std::ifstream& infile) {
         std::string line;
         size_t      lineno = 0;
         while (std::getline(infile, line)) {
             assert(line.size() == WIDTH);
-            AOC_UBU(auto* bufiter = m_buffer.begin() + (lineno * WIDTH);)
+            AOC_UBU(auto* bufiter = m_buffer.begin() + (lineno * WIDTH));
             std::copy(line.cbegin(), line.cend(), bufiter);
             ++lineno;
             for (size_t idx{0}; idx < m_buffer.size(); ++idx) {
                 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-constant-array-index)
-                if (idx < (lineno * WIDTH)) {
+                if (std::cmp_less(idx, (lineno * WIDTH))) {
                     assert(m_buffer[idx] != 0);
                 } else {
                     assert(m_buffer[idx] == 0);
@@ -72,46 +136,11 @@ public:
         }
     }
 
-    char operator[](const size_t row, const size_t col) {
-        return get_item(row, col);
-    }
-
-    std::string
-    getstr(const size_t row, const size_t col, const Direction dir) {
-        constexpr size_t LEN{3};
-        std::string      retval;
-        if (((dir & Direction::N) == dir) && (row < LEN)) {
-            return retval;
+    explicit operator std::string() {
+        std::string retval{};
+        for (uint32_t row{0}; row < HEIGHT; ++row) {
+            retval.append(get_line(row) + "\n");
         }
-        if (((dir & Direction::S) == dir) && (row > (HEIGHT - LEN))) {
-            return retval;
-        }
-        if (((dir & Direction::E) == dir) && (row > (WIDTH - LEN))) {
-            return retval;
-        }
-        if (((dir & Direction::W) == dir) && (col < LEN)) {
-            return retval;
-        }
-        const long modcol = ((dir & Direction::N) / Direction::N)
-                            - ((dir & Direction::S) / Direction::S);
-        const long modrow = ((dir & Direction::E) / Direction::E)
-                            - ((dir & Direction::W) / Direction::W);
-        retval.push_back(get_item(
-            static_cast<size_t>(static_cast<long>(row) + (0L * modrow)),
-            static_cast<size_t>(static_cast<long>(col) + (0L * modcol))
-        ));
-        retval.push_back(get_item(
-            static_cast<size_t>(static_cast<long>(row) + (1L * modrow)),
-            static_cast<size_t>(static_cast<long>(col) + (1L * modcol))
-        ));
-        retval.push_back(get_item(
-            static_cast<size_t>(static_cast<long>(row) + (2L * modrow)),
-            static_cast<size_t>(static_cast<long>(col) + (2L * modcol))
-        ));
-        retval.push_back(get_item(
-            static_cast<size_t>(static_cast<long>(row) + (3L * modrow)),
-            static_cast<size_t>(static_cast<long>(col) + (3L * modcol))
-        ));
         return retval;
     }
 };
@@ -121,17 +150,8 @@ public:
 void aoc::run() {
     std::ifstream instream{aoc::file::day_stream(4)};
     WordSearch    wordsearch{instream};
-    WordSearch    dots{instream};
-    for (size_t row{0}; row < WIDTH; ++row) {
-        for (size_t col{0}; col < HEIGHT; ++col) {
-            if (wordsearch[row, col] == 'X') {
-                for (const Direction dir: DIRECTIONS) {
-                    const std::string tmp_str{wordsearch.getstr(row, col, dir)};
-                    if (tmp_str == "XMAS" || tmp_str == "SAMX") {
-                        aoc::part1 += 1;
-                    }
-                }
-            }
-        }
-    }
+    WordSearch    dots{};
+
+    aoc::print("DOTS:");
+    aoc::print(std::string(dots));
 }
