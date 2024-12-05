@@ -49,12 +49,6 @@ void debug(std::string_view fst, auto&&... args) {
     debug(std::string(std::vformat(fst, std::make_format_args(args...))));
 }
 
-template<typename T>
-struct Vec2 {
-    T m_x;
-    T m_y;
-};
-
 namespace file {
 std::string           day_txt(uint8_t day);
 std::filesystem::path day_path(uint8_t day);
