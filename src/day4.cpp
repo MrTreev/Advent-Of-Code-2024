@@ -3,91 +3,109 @@
 #include <cstddef>
 #include <stdexcept>
 #include <string>
-#include <utility>
-#include <vector>
 
 namespace {
+
 enum Direction : uint8_t {
+    //     NESW
     N  = 0b1000,
-    NE = 0b1010,
-    E  = 0b0010,
+    NE = 0b1100,
+    E  = 0b0100,
     SE = 0b0110,
-    S  = 0b0100,
-    SW = 0b0101,
+    S  = 0b0010,
+    SW = 0b0011,
     W  = 0b0001,
     NW = 0b1001,
 };
 
-// std::string to_string(Direction dir) {
-//     switch (dir) {
-//     case N:
-//         return "N ";
-//     case NE:
-//         return "NE";
-//     case E:
-//         return "E ";
-//     case SE:
-//         return "SE";
-//     case S:
-//         return "S ";
-//     case SW:
-//         return "SW";
-//     case W:
-//         return "W ";
-//     case NW:
-//         return "NW";
-//     }
-// }
-//
-// constexpr std::array<Direction, 8> DIRECTIONS{
-//     {
-//      N, NE,
-//      E, SE,
-//      S, SW,
-//      W, NW,
-//      }
-// };
-//
-// bool north(Direction dir) {
-//     return (dir & Direction::N) != 0;
-// }
-//
-// bool south(Direction dir) {
-//     return (dir & Direction::S) != 0;
-// }
-//
-// bool east(Direction dir) {
-//     return (dir & Direction::E) != 0;
-// }
-//
-// bool west(Direction dir) {
-//     return (dir & Direction::W) != 0;
-// }
+constexpr std::array<Direction, 8> DIRECTIONS{
+    {
+     N, NE,
+     E, SE,
+     S, SW,
+     W, NW,
+     }
+};
+
+bool north(Direction dir) {
+    return (dir & Direction::N) != 0;
+}
+
+bool south(Direction dir) {
+    return (dir & Direction::S) != 0;
+}
+
+bool east(Direction dir) {
+    return (dir & Direction::E) != 0;
+}
+
+bool west(Direction dir) {
+    return (dir & Direction::W) != 0;
+}
+
+bool is_xmas(const std::string& test) {
+    return (test == "XMAS");
+}
+
+template<size_t Len>
+class Square {
+    std::array<char, Len * Len> m_buffer;
+
+public:
+    explicit Square(std::array<char, Len * Len> buf)
+        : m_buffer(std::move(buf)) {}
+
+    const char& get(size_t row, size_t col) {
+        // NOLINTNEXTLINE(*-constant-array-index)
+        return m_buffer[(row * Len) + col];
+    }
+
+    bool mas(Direction dir) {
+        // clang-format off
+        switch (dir) {
+        case NE: return ((get(2, 0) == 'M' && get(0, 2) == 'S'));
+        case SE: return ((get(0, 0) == 'M' && get(2, 2) == 'S'));
+        case SW: return ((get(0, 2) == 'M' && get(2, 0) == 'S'));
+        case NW: return ((get(2, 2) == 'M' && get(0, 0) == 'S'));
+		case N: case S: case E: case W:
+			throw std::logic_error("bad dir");
+        }
+        // clang-format on
+    }
+
+    explicit operator std::string() {
+        std::string retval{};
+        retval.push_back(get(0, 0));
+        retval.push_back(get(0, 1));
+        retval.push_back(get(0, 2));
+        retval.push_back('\n');
+        retval.push_back(get(1, 0));
+        retval.push_back(get(1, 1));
+        retval.push_back(get(1, 2));
+        retval.push_back('\n');
+        retval.push_back(get(2, 0));
+        retval.push_back(get(2, 1));
+        retval.push_back(get(2, 2));
+        return retval;
+    }
+};
 
 class WordSearch {
 private:
-    static constexpr size_t FULL_SIZE{140};
-    static constexpr size_t TEST_SIZE{10};
-
-    std::vector<char> m_buffer;
-    size_t            m_width{FULL_SIZE};
-    size_t            m_height{FULL_SIZE};
-
-    void set_sizes() {
-        if (aoc::test_mode) {
-            m_height = TEST_SIZE;
-            m_width  = TEST_SIZE;
-        }
-    }
+    static constexpr size_t AXIS_SIZE{140}; // 10 for test, 140 for full
+    static constexpr size_t XMAS_LEN{4};
+    static constexpr size_t m_width{AXIS_SIZE};
+    static constexpr size_t m_height{AXIS_SIZE};
+    std::array<char, m_height * m_width> m_buffer{};
 
     [[nodiscard]]
-    size_t idx(size_t row, size_t col) const {
-        if (std::cmp_greater(row, m_height)) {
+    static size_t idx(size_t row, size_t col) {
+        if (row >= m_height) {
             throw std::runtime_error(
                 std::format("row {} out of bounds, max: {}", row, m_height)
             );
         }
-        if (std::cmp_greater(col, m_width)) {
+        if (col >= m_width) {
             throw std::runtime_error(
                 std::format("col {} out of bounds, max: {}", col, m_width)
             );
@@ -95,40 +113,115 @@ private:
         return (row * m_width) + col;
     }
 
-    [[nodiscard]]
-    std::string get_line(size_t row) const {
-        return {&m_buffer[idx(row, 0)], m_width};
+    char& get_mut(size_t row, size_t col) {
+        return m_buffer[idx(row, col)]; // NOLINT
     }
 
 public:
     explicit WordSearch(std::ifstream& infile) {
-        set_sizes();
-        m_buffer.resize(m_width * m_height);
         std::string line;
         for (size_t row{0}; row < m_height; ++row) {
             std::getline(infile, line);
+            aoc::debug(line);
             for (size_t col{0}; col < m_width; ++col) {
-                m_buffer[idx(row, col)] = line[col];
+                get_mut(row, col) = line[col];
             }
         }
     }
 
-    explicit operator std::string() {
+    [[nodiscard]]
+    const char& get_item(size_t row, size_t col) const {
+        return m_buffer[idx(row, col)]; // NOLINT
+    }
+
+    static constexpr size_t SQUARE_SIZE{9};
+
+    [[nodiscard]]
+    std::array<char, SQUARE_SIZE> get_square(size_t row, size_t col) const {
+        std::array<char, SQUARE_SIZE> retval{};
+        // NOLINTBEGIN(*-magic-numbers)
+        retval[0] = get_item(row - 1, col - 1);
+        retval[1] = get_item(row - 1, col + 0);
+        retval[2] = get_item(row - 1, col + 1);
+        retval[3] = get_item(row + 0, col - 1);
+        retval[4] = get_item(row + 0, col + 0);
+        retval[5] = get_item(row + 0, col + 1);
+        retval[6] = get_item(row + 1, col - 1);
+        retval[7] = get_item(row + 1, col + 0);
+        retval[8] = get_item(row + 1, col + 1);
+        // NOLINTEND(*-magic-numbers)
+        return retval;
+    }
+
+    [[nodiscard]]
+    std::string get_string(size_t row, size_t col, Direction dir) const {
         std::string retval{};
-        for (uint32_t row{0}; row < m_height; ++row) {
-            retval.append(get_line(row) + "\n");
+        for (size_t mod{0}; mod < XMAS_LEN; ++mod) {
+            size_t this_row{row};
+            size_t this_col{col};
+            if (north(dir)) {
+                this_row -= mod;
+            }
+            if (south(dir)) {
+                this_row += mod;
+            }
+            if (east(dir)) {
+                this_col += mod;
+            }
+            if (west(dir)) {
+                this_col -= mod;
+            }
+            try {
+                retval.push_back(get_item(this_row, this_col));
+            } catch (std::runtime_error&) {
+                return {};
+            }
         }
         return retval;
+    }
+
+    static size_t width() {
+        return m_width;
+    }
+
+    static size_t height() {
+        return m_height;
     }
 };
 
 } // namespace
 
 void aoc::run() {
-    std::ifstream instream{aoc::file::day_stream(4)};
-    WordSearch    wordsearch{instream};
-    WordSearch    dots{wordsearch};
+    std::ifstream    instream{aoc::file::day_stream(4)};
+    const WordSearch wordsearch{instream};
 
-    aoc::print("DOTS:");
-    aoc::print(std::string(dots));
+    for (size_t row{0}; row < WordSearch::height(); ++row) {
+        for (size_t col{0}; col < WordSearch::width(); ++col) {
+            for (Direction dir: DIRECTIONS) {
+                const std::string tmp{wordsearch.get_string(row, col, dir)};
+                if (is_xmas(tmp)) {
+                    aoc::part1 += 1;
+                }
+            }
+        }
+    }
+    for (size_t row{1}; row < WordSearch::height() - 1; ++row) {
+        for (size_t col{1}; col < WordSearch::width() - 1; ++col) {
+            if (wordsearch.get_item(row, col) == 'A') {
+                Square<3>  sqr{wordsearch.get_square(row, col)};
+                const bool is_mas{
+                    false // NOLINT(*-simplify-boolean-expr)
+                    || (sqr.mas(NE) && (sqr.mas(SE) || sqr.mas(NW)))
+                    || (sqr.mas(NW) && (sqr.mas(SW) || sqr.mas(NE)))
+                    || (sqr.mas(SE) && (sqr.mas(NE) || sqr.mas(SW)))
+                    || (sqr.mas(SW) && (sqr.mas(NW) || sqr.mas(SE)))
+                };
+                aoc::debug("\nis_mas: {}", is_mas);
+                aoc::debug(std::string(sqr));
+                if (is_mas) {
+                    aoc::part2 += 1;
+                }
+            }
+        }
+    }
 }
