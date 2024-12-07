@@ -11,7 +11,7 @@ PATH_TXT	=	${PROJECT}/txt
 PATH_OUT	=	${PROJECT}/out
 PATH_BLD	=	${PATH_OUT}/build
 PATH_BIN	=	${PATH_OUT}/bin
-PATH_TST	=	${PATH_OUT}/test
+PATH_DAT	=	${PATH_OUT}/test
 PATH_MAK	=	${PATH_ETC}/make
 
 ifeq (${COMPILER}, clang)
@@ -29,6 +29,6 @@ DAY_FILES	=	$(shell find ${PATH_SRC} -type f -name 'day*.cpp')
 BLD_FILES	=	$(patsubst ${PATH_SRC}/%.cpp,${PATH_BLD}/%.o,${SRC_FILES})
 BIN_FILES	=	$(patsubst ${PATH_SRC}/%.cpp,${PATH_BIN}/%,${DAY_FILES})
 TXT_FILES	=	$(patsubst ${PATH_SRC}/%.cpp,${PATH_TXT}/%.txt,${DAY_FILES})
-TST_FILES	=	$(patsubst ${PATH_SRC}/%.cpp,${PATH_TST}/%.txt,${DAY_FILES})
+DAT_FILES	=	$(patsubst ${PATH_SRC}/%.cpp,${PATH_DAT}/%.txt,${DAY_FILES})
 
 DAY1_PART1  =    1722302

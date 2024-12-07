@@ -70,6 +70,15 @@ std::string aoc::string::slurp(std::ifstream instr) {
     return sstr.str();
 }
 
+uint8_t aoc::string::char_to_uint(char cha) {
+    return static_cast<uint8_t>(cha) - static_cast<uint8_t>('0');
+}
+
+uint8_t aoc::string::char_to_uint(char cha_1, char cha_2) {
+    // NOLINTNEXTLINE(*-magic-numbers)
+    return (10 * char_to_uint(cha_1)) + char_to_uint(cha_2);
+}
+
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
     if (argc > 1) {
         aoc::test_mode = true;

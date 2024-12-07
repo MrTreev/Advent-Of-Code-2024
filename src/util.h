@@ -62,7 +62,9 @@ void print_part(uint8_t num, const size_t& part);
 namespace string {
 std::string slurp(std::ifstream instr);
 
-bool is_numeric(const std::string& str);
+bool   is_numeric(const std::string& str);
+uint8_t char_to_uint(char cha);
+uint8_t char_to_uint(char cha_1, char cha_2);
 } // namespace string
 
 namespace math {
