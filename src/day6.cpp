@@ -1,7 +1,6 @@
 #include "util.h"
 #include <algorithm>
 #include <cassert>
-#include <utility>
 #include <vector>
 
 namespace {
@@ -51,23 +50,8 @@ public:
 
     bool operator==(const Coordinate& other) const = default;
 
-    bool operator<(const Coordinate& other) const {
-        return (
-            std::cmp_less(m_row, other.m_row)
-            || std::cmp_less(m_col, other.m_col)
-        );
-    }
-
     bool operator>(const Coordinate& other) const {
         return (m_row > other.m_row || m_col > other.m_col);
-    }
-
-    bool operator>=(const Coordinate& other) const {
-        return (m_row >= other.m_row || m_col >= other.m_col);
-    }
-
-    bool operator<=(const Coordinate& other) const {
-        return (m_row <= other.m_row || m_col <= other.m_col);
     }
 };
 
@@ -106,14 +90,44 @@ public:
         }
     }
 
+    static Coordinate idx(size_t idx) {
+        if (idx >= (WIDTH * HEIGHT)) {
+            throw std::runtime_error(std::format(
+                "idx {} out of bounds, max: {}",
+                idx,
+                (WIDTH * HEIGHT)
+            ));
+        }
+        return {(idx / WIDTH), (idx % WIDTH)};
+    }
+
+    void block(const size_t idx) {
+        m_buffer[idx] = '#'; // NOLINT(*-array-index)
+    }
+
     [[nodiscard]]
     const char& get_item(size_t row, size_t col) const {
         return m_buffer[idx(row, col)]; // NOLINT
     }
 
     [[nodiscard]]
+    constexpr size_t size() const {
+        return m_buffer.size();
+    }
+
+    [[nodiscard]]
     const char& get_item(const Coordinate& coord) const {
         return m_buffer[idx(coord.x(), coord.y())]; // NOLINT
+    }
+
+    [[nodiscard]]
+    auto begin() {
+        return m_buffer.begin();
+    }
+
+    [[nodiscard]]
+    auto end() {
+        return m_buffer.end();
     }
 
     static constexpr size_t width() {
@@ -195,11 +209,9 @@ bool in(auto item, const std::vector<decltype(item)>& vec) {
     });
 }
 
-void part1() {
-    std::ifstream instream{aoc::file::day_stream(6)}; // NOLINT(*-magic-numbers)
+void run_part_1(Map map, const Guard& inguard) {
     std::vector<Coordinate> coords{};
-    Map                     map{instream};
-    Guard                   guard{map};
+    Guard                   guard{inguard};
     coords.push_back(guard.position());
 
     while (guard.check_next()) {
@@ -212,28 +224,42 @@ void part1() {
     assert(aoc::part1 == 5145UL);
 }
 
-void part2() {
-    std::ifstream instream{aoc::file::day_stream(6)}; // NOLINT(*-magic-numbers)
-    std::vector<Coordinate> coords{};
-    Map                     map{instream};
-    Guard                   guard{map};
-    coords.push_back(guard.position());
-
+bool run_iter(Guard guard, Map map) {
+    std::vector<std::string> items{};
     while (guard.check_next()) {
         guard.next(map);
-        if (!in(guard.position(), coords)) {
-            coords.push_back(guard.position());
+        auto g_item = std::string(guard);
+        if (in(g_item, items)) {
+            return true;
         }
-        aoc::debug(std::string(guard));
+        items.emplace_back(g_item);
     }
-    for (Coordinate coord: coords) {
-        aoc::debug(std::string(coord));
+    return false;
+}
+
+void run_part_2(Map map, const Guard& inguard) {
+    const Guard guard{inguard};
+    aoc::debug("");
+    for (auto& pos: map) {
+        if (pos != '#') {
+            if (run_iter(guard, map)) {
+                aoc::part2 += 1;
+                aoc::debug("found loop");
+            } else {
+                aoc::debug("no loop");
+            }
+        }
     }
+    aoc::debug("");
 }
 
 } // namespace
 
 void aoc::run() {
-    ::part1();
-    ::part2();
+    std::ifstream instream{aoc::file::day_stream(6)}; // NOLINT(*-magic-numbers)
+    const Map     map{instream};
+    const Guard   guard{map};
+    print(std::string(map));
+    run_part_1(map, guard);
+    run_part_2(map, guard);
 }
