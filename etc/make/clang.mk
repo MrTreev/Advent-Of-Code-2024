@@ -1,9 +1,7 @@
 .EXPORT_ALL_VARIABLES:
 
 CXX			=	clang++
-
-CXXLIB		=	libstdc++
-RTLIB		=	compiler-rt
+LD			=	clang++
 
 CXXFLAGS	+=	-std=c++23
 CXXFLAGS	+=	-iquote${PATH_SRC}

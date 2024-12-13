@@ -8,11 +8,11 @@ void aoc::run() {
     std::vector<int64_t> left;
     std::vector<int64_t> right;
 
-    int64_t a;
-    int64_t b;
-    while (in_stream >> a >> b) {
-        left.push_back(a);
-        right.push_back(b);
+    int64_t a_in{};
+    int64_t b_in{};
+    while (in_stream >> a_in >> b_in) {
+        left.push_back(a_in);
+        right.push_back(b_in);
     }
 
     const size_t         vecsize{left.size()};
@@ -26,6 +26,8 @@ void aoc::run() {
     }
 
     for (const int64_t lval: left) {
-        aoc::part2 += static_cast<size_t>(lval * std::count(right.begin(), right.end(), lval));
+        aoc::part2 += static_cast<size_t>(
+            lval * std::count(right.begin(), right.end(), lval)
+        );
     }
 }

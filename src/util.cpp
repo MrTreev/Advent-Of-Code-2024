@@ -3,9 +3,9 @@
 #include <iostream>
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
-bool   aoc::test_mode;
-size_t aoc::part1{0};
-size_t aoc::part2{0};
+std::atomic<bool>   aoc::test_mode;
+std::atomic<size_t> aoc::part1{0};
+std::atomic<size_t> aoc::part2{0};
 
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
 

@@ -93,9 +93,7 @@ bool all_satisfies(const Update& update, const std::vector<Ordering>& orders) {
     return (std::all_of(
         orders.cbegin(),
         orders.cend(),
-        [update](const Ordering& ooo) {
-        return update.satisfies(ooo);
-    }
+        [update](const Ordering& ooo) { return update.satisfies(ooo); }
     ));
 }
 
@@ -126,6 +124,7 @@ void aoc::run() {
             bad_updates.emplace_back(update);
         }
     }
+    assert(aoc::part1 == 5091);
 
     for (auto& update: bad_updates) {
         while (!all_satisfies(update, orders)) {
@@ -139,8 +138,5 @@ void aoc::run() {
         aoc::debug("sort: {}", std::string(update));
         aoc::debug("mid:  {}", std::to_string(update.mid()));
     }
-
-    for (const auto& update: bad_updates) {
-        assert(all_satisfies(update, orders));
-    }
+    //assert(aoc::part2 == );
 }

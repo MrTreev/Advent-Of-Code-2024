@@ -2,6 +2,9 @@
 .DELETE_ON_ERROR:
 
 COMPILER	=	clang
+DEBUG       =   true
+CXXLIB		=	stdc++
+RTLIB		=	compiler-rt
 
 PROJECT		=	${PWD}
 
@@ -14,6 +17,13 @@ PATH_BIN	=	${PATH_OUT}/bin
 PATH_DAT	=	${PATH_OUT}/test
 PATH_MAK	=	${PATH_ETC}/make
 
+ifeq (${DEBUG}, true)
+    CXXFLAGS	+=	-g
+    CXXFLAGS	+=	-ggdb
+else
+    CXXFLAGS    +=  -0fast
+endif
+
 ifeq (${COMPILER}, clang)
 	include ${PATH_MAK}/clang.mk
 endif
@@ -24,11 +34,27 @@ ifeq (${COMPILER}, tcc)
 	include ${PATH_MAK}/tcc.mk
 endif
 
+ifeq (${CXXLIB}, stdc++)
+	CXXFLAGS	+=	-stdlib=libstdc++
+	LDFLAGS		+=	-lc
+	LDFLAGS		+=	-lstdc++
+	LDFLAGS		+=	-ltbb
+else
+	CXXFLAGS	+=	-stdlib=libc++
+	LDFLAGS		+=	-lc
+	LDFLAGS		+=	-lc++
+	LDFLAGS		+=	-ltbb
+endif
+
+# ifeq (${RTLIB}, compiler-rt)
+# 	CXXFLAGS	+=	-rtlib=compiler-rt
+# else
+# 	CXXFLAGS	+=	-rtlib=libgcc
+# endif
+
 SRC_FILES	=	$(shell find ${PATH_SRC} -type f -name '*.cpp')
 DAY_FILES	=	$(shell find ${PATH_SRC} -type f -name 'day*.cpp')
 BLD_FILES	=	$(patsubst ${PATH_SRC}/%.cpp,${PATH_BLD}/%.o,${SRC_FILES})
 BIN_FILES	=	$(patsubst ${PATH_SRC}/%.cpp,${PATH_BIN}/%,${DAY_FILES})
 TXT_FILES	=	$(patsubst ${PATH_SRC}/%.cpp,${PATH_TXT}/%.txt,${DAY_FILES})
 DAT_FILES	=	$(patsubst ${PATH_SRC}/%.cpp,${PATH_DAT}/%.txt,${DAY_FILES})
-
-DAY1_PART1  =    1722302

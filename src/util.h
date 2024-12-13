@@ -1,4 +1,7 @@
 #pragma once
+#include <algorithm>
+#include <atomic>
+#include <cassert>
 #include <cstdarg>
 #include <cstddef>
 #include <cstdint>
@@ -9,6 +12,7 @@
 #include <fstream>
 #include <string>
 #include <typeinfo>
+#include <vector>
 
 using std::int16_t;
 using std::int32_t;
@@ -31,13 +35,13 @@ using std::ptrdiff_t;
 using std::size_t;
 
 namespace aoc {
-void          run(); // Use this to run your day's code
 // NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
-extern size_t part1;
-extern size_t part2;
-extern bool   test_mode;
+extern std::atomic<size_t> part1;
+extern std::atomic<size_t> part2;
+extern std::atomic<bool>   test_mode;
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
 
+void run(); // Use this to run your day's code
 void print(const std::string& str);
 void debug(const std::string& str);
 
@@ -47,6 +51,12 @@ void print(std::string_view fst, auto&&... args) {
 
 void debug(std::string_view fst, auto&&... args) {
     debug(std::string(std::vformat(fst, std::make_format_args(args...))));
+}
+
+bool in(auto item, const std::vector<decltype(item)>& vec) {
+    return std::ranges::any_of(vec.begin(), vec.end(), [item](auto cmp) {
+        return cmp == item;
+    });
 }
 
 namespace file {
@@ -62,7 +72,7 @@ void print_part(uint8_t num, const size_t& part);
 namespace string {
 std::string slurp(std::ifstream instr);
 
-bool   is_numeric(const std::string& str);
+bool    is_numeric(const std::string& str);
 uint8_t char_to_uint(char cha);
 uint8_t char_to_uint(char cha_1, char cha_2);
 } // namespace string

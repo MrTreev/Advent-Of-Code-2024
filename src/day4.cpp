@@ -205,6 +205,7 @@ void aoc::run() {
             }
         }
     }
+    assert(aoc::part1 == 2468);
     for (size_t row{1}; row < WordSearch::height() - 1; ++row) {
         for (size_t col{1}; col < WordSearch::width() - 1; ++col) {
             if (wordsearch.get_item(row, col) == 'A') {
@@ -224,4 +225,5 @@ void aoc::run() {
             }
         }
     }
+    assert(aoc::part2 == 1864);
 }

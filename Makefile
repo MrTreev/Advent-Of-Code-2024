@@ -1,11 +1,6 @@
 .EXPORT_ALL_VARIABLES:
 include Makefile.defs
 
-CXXFLAGS += -g -ggdb
-LD = clang++
-LDFLAGS += -lc
-LDFLAGS += -lstdc++
-
 .PHONY: all
 all: text ${BIN_FILES}
 

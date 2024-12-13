@@ -1,7 +1,6 @@
 #include "util.h"
-#include <algorithm>
-#include <cassert>
-#include <vector>
+#include <execution>
+#include <stdexcept>
 
 namespace {
 constexpr size_t AXIS_SIZE{130}; // 10 for test, 130 for full
@@ -39,6 +38,11 @@ public:
     }
 
     [[nodiscard]]
+    bool in_range() const {
+        return ((m_row < AXIS_SIZE) && (m_col < AXIS_SIZE));
+    }
+
+    [[nodiscard]]
     size_t x() const {
         return m_row;
     }
@@ -48,11 +52,10 @@ public:
         return m_col;
     }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-member-function"
     bool operator==(const Coordinate& other) const = default;
-
-    bool operator>(const Coordinate& other) const {
-        return (m_row > other.m_row || m_col > other.m_col);
-    }
+#pragma clang diagnostic pop
 };
 
 class Map {
@@ -62,14 +65,14 @@ private:
     std::array<char, HEIGHT * WIDTH> m_buffer{0};
 
     static size_t idx(size_t row, size_t col) {
-        if (row >= HEIGHT) {
+        if (row >= height()) {
             throw std::runtime_error(
-                std::format("row {} out of bounds, max: {}", row, HEIGHT)
+                std::format("row {} out of bounds, max: {}", row, height())
             );
         }
-        if (col >= WIDTH) {
+        if (col >= width()) {
             throw std::runtime_error(
-                std::format("col {} out of bounds, max: {}", col, WIDTH)
+                std::format("col {} out of bounds, max: {}", col, width())
             );
         }
         return (row * WIDTH) + col;
@@ -82,23 +85,17 @@ private:
 public:
     explicit Map(std::ifstream& infile) {
         std::string line;
-        for (size_t row{0}; row < HEIGHT; ++row) {
+        for (size_t row{0}; row < height(); ++row) {
             std::getline(infile, line);
-            for (size_t col{0}; col < WIDTH; ++col) {
+            for (size_t col{0}; col < width(); ++col) {
                 get_mut(row, col) = line[col];
             }
         }
     }
 
-    static Coordinate idx(size_t idx) {
-        if (idx >= (WIDTH * HEIGHT)) {
-            throw std::runtime_error(std::format(
-                "idx {} out of bounds, max: {}",
-                idx,
-                (WIDTH * HEIGHT)
-            ));
-        }
-        return {(idx / WIDTH), (idx % WIDTH)};
+    Map(const Map& other, size_t idx)
+        : Map(other) {
+        block(idx);
     }
 
     void block(const size_t idx) {
@@ -120,16 +117,6 @@ public:
         return m_buffer[idx(coord.x(), coord.y())]; // NOLINT
     }
 
-    [[nodiscard]]
-    auto begin() {
-        return m_buffer.begin();
-    }
-
-    [[nodiscard]]
-    auto end() {
-        return m_buffer.end();
-    }
-
     static constexpr size_t width() {
         return WIDTH;
     }
@@ -140,8 +127,8 @@ public:
 
     explicit operator std::string() const {
         std::string outstr{};
-        for (size_t row{0}; row < HEIGHT; ++row) {
-            for (size_t col{0}; col < WIDTH; ++col) {
+        for (size_t row{0}; row < height(); ++row) {
+            for (size_t col{0}; col < width(); ++col) {
                 char item = get_item(row, col);
                 outstr.push_back(item);
             }
@@ -177,11 +164,6 @@ public:
         }
     }
 
-    bool check_next() {
-        constexpr Coordinate max_pos = {Map::width(), Map::height()};
-        return !((m_position + m_facing) > max_pos);
-    }
-
     void next(const Map& map) {
         if (map.get_item(m_position + m_facing) == '#') {
             turn();
@@ -190,10 +172,18 @@ public:
         }
     }
 
-    const Coordinate& position() {
+    [[nodiscard]]
+    bool check_next() const {
+        const Coordinate next_pos = (m_position + m_facing);
+        return next_pos.in_range();
+    }
+
+    [[nodiscard]]
+    const Coordinate& position() const {
         return m_position;
     }
 
+    [[nodiscard]]
     explicit operator std::string() const {
         return std::format(
             "{}: {}",
@@ -203,12 +193,6 @@ public:
     }
 };
 
-bool in(auto item, const std::vector<decltype(item)>& vec) {
-    return std::ranges::any_of(vec.begin(), vec.end(), [item](auto cmp) {
-        return cmp == item;
-    });
-}
-
 void run_part_1(Map map, const Guard& inguard) {
     std::vector<Coordinate> coords{};
     Guard                   guard{inguard};
@@ -216,41 +200,43 @@ void run_part_1(Map map, const Guard& inguard) {
 
     while (guard.check_next()) {
         guard.next(map);
-        if (!in(guard.position(), coords)) {
+        if (!aoc::in(guard.position(), coords)) {
             coords.push_back(guard.position());
         }
     }
     aoc::part1 = coords.size();
-    assert(aoc::part1 == 5145UL);
 }
 
-bool run_iter(Guard guard, Map map) {
+bool run_iter(Guard guard, Map inmap, size_t idx) {
     std::vector<std::string> items{};
+    Map                      map{inmap, idx};
     while (guard.check_next()) {
         guard.next(map);
-        auto g_item = std::string(guard);
-        if (in(g_item, items)) {
+        const std::string g_item{guard};
+        if (aoc::in(g_item, items)) {
+            aoc::debug("found loop at {}", idx);
             return true;
         }
         items.emplace_back(g_item);
     }
+    aoc::debug("found no loop at {}", idx);
     return false;
 }
 
 void run_part_2(Map map, const Guard& inguard) {
     const Guard guard{inguard};
     aoc::debug("");
-    for (auto& pos: map) {
-        if (pos != '#') {
-            if (run_iter(guard, map)) {
-                aoc::part2 += 1;
-                aoc::debug("found loop");
-            } else {
-                aoc::debug("no loop");
-            }
-        }
-    }
-    aoc::debug("");
+    std::vector<size_t> indexs(map.size());
+    std::vector<bool>   items(map.size());
+    std::iota(indexs.begin(), indexs.end(), 0);
+    std::for_each(
+        std::execution::par_unseq,
+        indexs.begin(),
+        indexs.end(),
+        [&](size_t idx) { items[idx] = run_iter(guard, map, idx); }
+    );
+    aoc::part2 =
+        static_cast<size_t>(std::count(items.begin(), items.end(), true));
 }
 
 } // namespace
@@ -261,5 +247,7 @@ void aoc::run() {
     const Guard   guard{map};
     print(std::string(map));
     run_part_1(map, guard);
+    assert(aoc::part1 == 5145UL);
     run_part_2(map, guard);
+    assert(aoc::part1 == 1523UL);
 }

@@ -11,7 +11,10 @@ bool badtst(const int aval, const int bval) {
 }
 
 bool is_sorted_one_way(const std::vector<int>& vec) {
-    return (std::is_sorted(vec.cbegin(), vec.cend()) || std::is_sorted(vec.crbegin(), vec.crend()));
+    return (
+        std::is_sorted(vec.cbegin(), vec.cend())
+        || std::is_sorted(vec.crbegin(), vec.crend())
+    );
 }
 
 bool all_good(const std::vector<int>& vec) {
@@ -67,8 +70,10 @@ void aoc::run() {
         if (all_good(items)) {
             aoc::part1 += 1;
         }
+        assert(aoc::part1 == 390);
         if (subone_good(items)) {
             aoc::part2 += 1;
         }
+        // assert(aoc::part2 == XXX);
     }
 }
