@@ -104,8 +104,8 @@ void aoc::run() {
     std::ifstream         instream{aoc::file::day_stream(5)};
     std::vector<Ordering> orders{};
     std::vector<Update>   updates{};
-    std::string           line;
-    while (std::getline(instream, line)) {
+
+    for (std::string line; std::getline(instream, line);) {
         if (line.find('|') < line.length()) {
             orders.emplace_back(line);
         } else if (line.find(',') < line.length()) {
