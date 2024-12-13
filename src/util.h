@@ -60,7 +60,7 @@ bool in(auto item, const std::vector<decltype(item)>& vec) {
 }
 
 namespace file {
-std::string           day_txt(uint8_t day);
+std::string           day_file(uint8_t day);
 std::filesystem::path day_path(uint8_t day);
 std::ifstream         day_stream(uint8_t day);
 } // namespace file
@@ -93,5 +93,78 @@ std::string type_name(auto item) {
     return ret_name;
 }
 } // namespace types
+
+namespace util {
+template<size_t AX_ROWS, size_t AX_COLS>
+class Grid {
+    static constexpr size_t          WIDTH{AX_COLS};
+    static constexpr size_t          HEIGHT{AX_ROWS};
+    std::array<char, HEIGHT * WIDTH> m_buffer{0};
+
+    static size_t idx(size_t row, size_t col) {
+        if (row >= height()) {
+            throw std::runtime_error(
+                std::format("row {} out of bounds, max: {}", row, height())
+            );
+        }
+        if (col >= width()) {
+            throw std::runtime_error(
+                std::format("col {} out of bounds, max: {}", col, width())
+            );
+        }
+        return (row * WIDTH) + col;
+    }
+
+    char& get_mut(size_t row, size_t col) {
+        return m_buffer[idx(row, col)]; // NOLINT
+    }
+
+public:
+    explicit Grid(std::ifstream& infile) {
+        std::string line;
+        for (size_t row{0}; row < height(); ++row) {
+            std::getline(infile, line);
+            for (size_t col{0}; col < width(); ++col) {
+                get_mut(row, col) = line[col];
+            }
+        }
+    }
+
+    [[nodiscard]]
+    constexpr size_t size() const {
+        return m_buffer.size();
+    }
+
+    [[nodiscard]]
+    const char& get_item(size_t row, size_t col) const {
+        return m_buffer[idx(row, col)]; // NOLINT
+    }
+
+    [[nodiscard]]
+    bool check(size_t row, size_t col) {
+        return (row < height() && col < width());
+    }
+
+    static constexpr size_t width() {
+        return WIDTH;
+    }
+
+    static constexpr size_t height() {
+        return HEIGHT;
+    }
+
+    explicit operator std::string() const {
+        std::string outstr{};
+        for (size_t row{0}; row < height(); ++row) {
+            for (size_t col{0}; col < width(); ++col) {
+                char item = get_item(row, col);
+                outstr.push_back(item);
+            }
+            outstr.push_back('\n');
+        }
+        return outstr;
+    }
+};
+} // namespace util
 
 } // namespace aoc

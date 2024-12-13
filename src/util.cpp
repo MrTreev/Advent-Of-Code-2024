@@ -19,7 +19,7 @@ void aoc::debug(const std::string& str) {
     }
 }
 
-std::string aoc::file::day_txt(uint8_t day) {
+std::string aoc::file::day_file(uint8_t day) {
     const std::string filename = std::format("out/test/day{}.txt", day);
     std::println(
         std::cout,
@@ -31,7 +31,7 @@ std::string aoc::file::day_txt(uint8_t day) {
 }
 
 std::filesystem::path aoc::file::day_path(uint8_t day) {
-    return std::filesystem::relative(day_txt(day));
+    return std::filesystem::relative(day_file(day));
 }
 
 std::ifstream aoc::file::day_stream(uint8_t day) {
