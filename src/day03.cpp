@@ -1,7 +1,7 @@
 #include "util.h"
+#include <algorithm>
 
 namespace {
-
 const std::string_view fmt_str{"| {:<12} | {:>3} | {:>3} | {:>8} | {:>10} |"};
 const std::string_view num_and_sep{"01234567890,"};
 
@@ -24,12 +24,11 @@ void run_part1(const std::string& line) {
         const size_t      sta_sep{sep - sta - 1};
         const size_t      sep_end{end - sep - 1};
         const std::string betwn{str_ptr, sta + 1, end - sta - 1};
-        const bool bet_s{std::all_of(betwn.begin(), betwn.end(), is_num_or_sep)
-        };
-        const bool mul_s{std::string(str_ptr, idx, 4) == "mul("};
-        const bool end_s{line[end] == ')'};
-        const bool a_len{sta_sep <= 3 && sta_sep >= 1};
-        const bool b_len{sep_end <= 3 && sep_end >= 1};
+        const bool        bet_s{std::ranges::all_of(betwn, is_num_or_sep)};
+        const bool        mul_s{std::string(str_ptr, idx, 4) == "mul("};
+        const bool        end_s{line[end] == ')'};
+        const bool        a_len{sta_sep <= 3 && sta_sep >= 1};
+        const bool        b_len{sep_end <= 3 && sep_end >= 1};
         const bool is_valid = (mul_s) && bet_s && end_s && a_len && b_len;
         if (is_valid) {
             const size_t aval{std::stoul({str_ptr, sta + 1, sta_sep})};
@@ -40,8 +39,8 @@ void run_part1(const std::string& line) {
     }
 }
 
-bool do_enabled{true
-}; //NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+//NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+bool do_enabled{true};
 
 size_t get_next(const std::string& line, size_t idx) {
     const size_t next_mul  = line.find("mul(", idx + 1);
@@ -73,14 +72,12 @@ void run_part2(const std::string& line) {
         const size_t      sta_sep = {sep - sta - 1};
         const size_t      sep_end = {end - sep - 1};
         const std::string betwn   = {str_ptr, sta + 1, end - sta - 1};
-        const bool        bet_s   = {
-            std::all_of(betwn.begin(), betwn.end(), is_num_or_sep)
-        };
-        const bool mul_s    = {std::string(str_ptr, idx, 4) == "mul("};
-        const bool end_s    = {line[end] == ')'};
-        const bool a_len    = {sta_sep <= 3 && sta_sep >= 1};
-        const bool b_len    = {sep_end <= 3 && sep_end >= 1};
-        const bool is_valid = (mul_s) && bet_s && end_s && a_len && b_len;
+        const bool        bet_s   = {std::ranges::all_of(betwn, is_num_or_sep)};
+        const bool        mul_s   = {std::string(str_ptr, idx, 4) == "mul("};
+        const bool        end_s   = {line[end] == ')'};
+        const bool        a_len   = {sta_sep <= 3 && sta_sep >= 1};
+        const bool        b_len   = {sep_end <= 3 && sep_end >= 1};
+        const bool is_valid       = (mul_s) && bet_s && end_s && a_len && b_len;
         if (is_valid && do_enabled) {
             const size_t aval  = {std::stoul({str_ptr, sta + 1, sta_sep})};
             const size_t bval  = {std::stoul({str_ptr, sep + 1, sep_end})};
@@ -99,10 +96,8 @@ void run_part2(const std::string& line) {
 } // namespace
 
 void aoc::run() {
-    aoc::print(fmt_str, "Parsed", "a", "b", "Result", "Total");
-    const std::string full_file = aoc::string::slurp(aoc::file::day_stream(3));
+    aoc::debug(fmt_str, "Parsed", "a", "b", "Result", "Total");
+    const std::string full_file = aoc::string::slurp(aoc::file::day_stream());
     run_part1(full_file);
-    assert(aoc::part1 == 171'183'089);
     run_part2(full_file);
-    assert(aoc::part1 == 63'866'497);
 }

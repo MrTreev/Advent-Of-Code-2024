@@ -8,7 +8,7 @@ ${BLD_FILES}: ${PATH_BLD}/%.o: ${PATH_SRC}/%.cpp
 	@mkdir -p $(dir $@)
 	@${CXX} ${CXXFLAGS} -o $@ -c $<
 
-${PATH_BIN}/day%: ${PATH_BLD}/day%.o ${PATH_BLD}/util.o
+${PATH_BIN}/day%: ${PATH_BLD}/day%.o ${PATH_BLD}/util.o ${PATH_BLD}/answers.o
 	@mkdir -p $(dir $@)
 	@${LD} ${CXXFLAGS} ${LDFLAGS} -o $@ $^
 

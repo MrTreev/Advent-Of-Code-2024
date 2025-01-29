@@ -1,5 +1,6 @@
 #include "util.h"
 #include <execution>
+#include <numeric>
 #include <stdexcept>
 
 namespace {
@@ -129,7 +130,7 @@ public:
         std::string outstr{};
         for (size_t row{0}; row < height(); ++row) {
             for (size_t col{0}; col < width(); ++col) {
-                char item = get_item(row, col);
+                const char item = get_item(row, col);
                 outstr.push_back(item);
             }
             outstr.push_back('\n');
@@ -209,7 +210,7 @@ void run_part_1(Map map, const Guard& inguard) {
 
 bool run_iter(Guard guard, Map inmap, size_t idx) {
     std::vector<std::string> items{};
-    Map                      map{inmap, idx};
+    const Map                map{inmap, idx};
     while (guard.check_next()) {
         guard.next(map);
         const std::string g_item{guard};
@@ -228,7 +229,7 @@ void run_part_2(Map map, const Guard& inguard) {
     aoc::debug("");
     std::vector<size_t> indexs(map.size());
     std::vector<bool>   items(map.size());
-    std::iota(indexs.begin(), indexs.end(), 0);
+    std::ranges::iota(indexs, 0);
     std::for_each(
         std::execution::par_unseq,
         indexs.begin(),
@@ -242,12 +243,10 @@ void run_part_2(Map map, const Guard& inguard) {
 } // namespace
 
 void aoc::run() {
-    std::ifstream instream{aoc::file::day_stream(6)}; // NOLINT(*-magic-numbers)
+    std::ifstream instream{aoc::file::day_stream()};
     const Map     map{instream};
     const Guard   guard{map};
-    print(std::string(map));
+    debug(std::string(map));
     run_part_1(map, guard);
-    assert(aoc::part1 == 5145UL);
     run_part_2(map, guard);
-    assert(aoc::part1 == 1523UL);
 }

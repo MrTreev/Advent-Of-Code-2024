@@ -1,10 +1,10 @@
 #include "util.h"
 #include <algorithm>
+#include <ranges>
 #include <string>
 #include <vector>
 
 namespace {
-
 bool badtst(const int aval, const int bval) {
     const int diff = std::abs(aval - bval);
     return (diff > 3 || diff < 1);
@@ -12,8 +12,8 @@ bool badtst(const int aval, const int bval) {
 
 bool is_sorted_one_way(const std::vector<int>& vec) {
     return (
-        std::is_sorted(vec.cbegin(), vec.cend())
-        || std::is_sorted(vec.crbegin(), vec.crend())
+        std::ranges::is_sorted(vec)
+        || std::ranges::is_sorted(std::ranges::reverse_view(vec))
     );
 }
 
@@ -57,7 +57,7 @@ bool subone_good(const std::vector<int>& vec) {
 } // namespace
 
 void aoc::run() {
-    std::ifstream    in_stream{aoc::file::day_stream(2)};
+    std::ifstream    in_stream{aoc::file::day_stream()};
     std::string      line;
     std::string      item;
     std::vector<int> items;
@@ -70,10 +70,8 @@ void aoc::run() {
         if (all_good(items)) {
             aoc::part1 += 1;
         }
-        assert(aoc::part1 == 390);
         if (subone_good(items)) {
             aoc::part2 += 1;
         }
-        // assert(aoc::part2 == XXX);
     }
 }

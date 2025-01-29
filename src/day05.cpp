@@ -5,6 +5,7 @@
 #include <vector>
 
 namespace {
+
 class Ordering {
     uint8_t m_first;
     uint8_t m_second;
@@ -79,8 +80,8 @@ public:
     }
 
     void reorder(const Ordering& ord) {
-        size_t idx_second = find(ord.second());
-        size_t idx_first  = find(ord.first(), idx_second);
+        const size_t idx_second = find(ord.second());
+        const size_t idx_first  = find(ord.first(), idx_second);
         for (size_t idx{idx_second}; idx < idx_first; ++idx) {
             const item_t tmp_item = m_buffer[idx];
             m_buffer[idx]         = m_buffer[idx + 1];
@@ -90,18 +91,15 @@ public:
 };
 
 bool all_satisfies(const Update& update, const std::vector<Ordering>& orders) {
-    return (std::all_of(
-        orders.cbegin(),
-        orders.cend(),
-        [update](const Ordering& ooo) { return update.satisfies(ooo); }
-    ));
+    return (std::ranges::all_of(orders, [update](const Ordering& ooo) {
+        return update.satisfies(ooo);
+    }));
 }
 
 } // namespace
 
 void aoc::run() {
-    // NOLINTNEXTLINE(*-magic-numbers)
-    std::ifstream         instream{aoc::file::day_stream(5)};
+    std::ifstream         instream{aoc::file::day_stream()};
     std::vector<Ordering> orders{};
     std::vector<Update>   updates{};
 
@@ -138,5 +136,4 @@ void aoc::run() {
         aoc::debug("sort: {}", std::string(update));
         aoc::debug("mid:  {}", std::to_string(update.mid()));
     }
-    //assert(aoc::part2 == );
 }

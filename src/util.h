@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <format>
 #include <fstream>
+#include <source_location>
 #include <string>
 #include <typeinfo>
 #include <vector>
@@ -39,9 +40,10 @@ namespace aoc {
 extern std::atomic<size_t> part1;
 extern std::atomic<size_t> part2;
 extern std::atomic<bool>   test_mode;
+
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
 
-void run(); // Use this to run your day's code
+void run();
 void print(const std::string& str);
 void debug(const std::string& str);
 
@@ -62,7 +64,8 @@ bool in(auto item, const std::vector<decltype(item)>& vec) {
 namespace file {
 std::string           day_file(uint8_t day);
 std::filesystem::path day_path(uint8_t day);
-std::ifstream         day_stream(uint8_t day);
+std::ifstream
+day_stream(const std::source_location& loc = std::source_location::current());
 } // namespace file
 
 namespace output {

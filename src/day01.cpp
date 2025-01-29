@@ -4,7 +4,7 @@
 #include <vector>
 
 void aoc::run() {
-    std::ifstream        in_stream{aoc::file::day_stream(1)};
+    std::ifstream        in_stream{aoc::file::day_stream()};
     std::vector<int64_t> left;
     std::vector<int64_t> right;
 
@@ -18,8 +18,8 @@ void aoc::run() {
     const size_t         vecsize{left.size()};
     std::vector<int64_t> left_sorted{left};
     std::vector<int64_t> right_sorted{right};
-    std::sort(left_sorted.begin(), left_sorted.end());
-    std::sort(right_sorted.begin(), right_sorted.end());
+    std::ranges::sort(left_sorted);
+    std::ranges::sort(right_sorted);
 
     for (size_t i = 0; i < vecsize; ++i) {
         aoc::part1 += static_cast<size_t>(std::abs(left[i] - right[i]));

@@ -80,12 +80,11 @@ void run_part_2() {}
 } // namespace
 
 void aoc::run() {
-    std::ifstream instream{aoc::file::day_stream(7)}; // NOLINT(*-magic-numbers)
+    std::ifstream          instream{aoc::file::day_stream()};
     std::vector<Operation> operations{};
     for (std::string line; std::getline(instream, line);) {
         operations.emplace_back(line);
     }
     run_part_1(operations);
-    assert(aoc::part1 == 14'711'933'466'277);
     run_part_2();
 }

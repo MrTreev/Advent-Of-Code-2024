@@ -192,12 +192,12 @@ public:
 } // namespace
 
 void aoc::run() {
-    std::ifstream    instream{aoc::file::day_stream(4)};
+    std::ifstream    instream{aoc::file::day_stream()};
     const WordSearch wordsearch{instream};
 
     for (size_t row{0}; row < WordSearch::height(); ++row) {
         for (size_t col{0}; col < WordSearch::width(); ++col) {
-            for (Direction dir: DIRECTIONS) {
+            for (const Direction dir: DIRECTIONS) {
                 const std::string tmp{wordsearch.get_string(row, col, dir)};
                 if (is_xmas(tmp)) {
                     aoc::part1 += 1;
@@ -205,7 +205,6 @@ void aoc::run() {
             }
         }
     }
-    assert(aoc::part1 == 2468);
     for (size_t row{1}; row < WordSearch::height() - 1; ++row) {
         for (size_t col{1}; col < WordSearch::width() - 1; ++col) {
             if (wordsearch.get_item(row, col) == 'A') {
@@ -225,5 +224,4 @@ void aoc::run() {
             }
         }
     }
-    assert(aoc::part2 == 1864);
 }
