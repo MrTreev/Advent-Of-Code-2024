@@ -1,8 +1,4 @@
 # C/C++
-out/
-txt/
-compile_commands.json
-.cache/
 *.a
 *.app
 *.d
@@ -22,3 +18,9 @@ compile_commands.json
 *.slo
 *.smod
 *.so
+
+/out/
+/compile_commands.json
+.cache/
+/txt/*
+!/txt/get_text.sh
