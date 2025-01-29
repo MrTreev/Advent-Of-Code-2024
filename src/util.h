@@ -98,13 +98,97 @@ std::string type_name(auto item) {
 } // namespace types
 
 namespace util {
-template<size_t AX_ROWS, size_t AX_COLS>
+template<typename Pos_t = size_t>
+class Coordinate {
+    Pos_t m_row;
+    Pos_t m_col;
+
+public:
+    constexpr Coordinate(Pos_t row, Pos_t col)
+        : m_row(row)
+        , m_col(col) {}
+
+    [[nodiscard]]
+    Pos_t row() const {
+        return m_row;
+    }
+
+    [[nodiscard]]
+    Pos_t col() const {
+        return m_col;
+    }
+
+    explicit operator std::string() const {
+        return std::format("({}, {})", row(), col());
+    }
+
+    bool operator==(const Coordinate& other) const {
+        return (row() == other.row() && col() == other.col());
+    }
+
+    bool operator>(const Coordinate& other) const {
+        return (row() > other.row() && col() > other.col());
+    }
+
+    bool operator<(const Coordinate& other) const {
+        return (row() < other.row() && col() < other.col());
+    }
+
+    bool operator>=(const Coordinate& other) const {
+        return (row() >= other.row() && col() >= other.col());
+    }
+
+    bool operator<=(const Coordinate& other) const {
+        return (row() <= other.row() && col() <= other.col());
+    }
+
+    Coordinate operator-(const Coordinate& other) const {
+        return {m_row - other.m_row, m_col - other.m_col};
+    }
+
+    Coordinate operator+(const Coordinate& other) const {
+        return {m_row + other.m_row, m_col + other.m_col};
+    }
+
+    Coordinate operator*(const Pos_t& other) const {
+        return {m_row * other, m_col * other};
+    }
+
+    Coordinate operator*(const Coordinate& other) const {
+        return {m_row * other.m_row, m_col * other.m_col};
+    }
+
+    void operator-=(const Coordinate& other) {
+        m_row -= other.m_row;
+        m_col -= other.m_col;
+    }
+
+    void operator+=(const Coordinate& other) {
+        m_row += other.m_row;
+        m_col += other.m_col;
+    }
+
+    void operator/=(const Coordinate& other) {
+        m_row /= other.m_row;
+        m_col /= other.m_col;
+    }
+
+    void operator*=(const Coordinate& other) {
+        m_row *= other.m_row;
+        m_col *= other.m_col;
+    }
+};
+
+using Coord = Coordinate<size_t>;
+
+template<size_t AX_ROWS, size_t AX_COLS, typename Pos_t = size_t>
 class Grid {
-    static constexpr size_t          WIDTH{AX_COLS};
-    static constexpr size_t          HEIGHT{AX_ROWS};
+    static constexpr Pos_t           WIDTH{AX_COLS};
+    static constexpr Pos_t           HEIGHT{AX_ROWS};
     std::array<char, HEIGHT * WIDTH> m_buffer{0};
 
-    static size_t idx(size_t row, size_t col) {
+protected:
+    static Pos_t idx(Pos_t row, Pos_t col) {
         if (row >= height()) {
             throw std::runtime_error(
                 std::format("row {} out of bounds, max: {}", row, height())
@@ -118,7 +202,7 @@ class Grid {
         return (row * WIDTH) + col;
     }
 
-    char& get_mut(size_t row, size_t col) {
+    char& get_mut(Pos_t row, Pos_t col) {
         return m_buffer[idx(row, col)]; // NOLINT
     }
 
@@ -139,27 +223,32 @@ public:
     }
 
     [[nodiscard]]
-    const char& get_item(size_t row, size_t col) const {
+    const char& get_item(Pos_t row, Pos_t col) const {
         return m_buffer[idx(row, col)]; // NOLINT
     }
 
     [[nodiscard]]
-    bool check(size_t row, size_t col) {
+    static bool check(Pos_t row, Pos_t col) {
         return (row < height() && col < width());
     }
 
-    static constexpr size_t width() {
+    [[nodiscard]]
+    static bool check(const Coordinate<Pos_t>& pos) {
+        return (pos.row() < height() && pos.col() < width());
+    }
+
+    static constexpr Pos_t width() {
         return WIDTH;
     }
 
-    static constexpr size_t height() {
+    static constexpr Pos_t height() {
         return HEIGHT;
     }
 
     explicit operator std::string() const {
         std::string outstr{};
-        for (size_t row{0}; row < height(); ++row) {
-            for (size_t col{0}; col < width(); ++col) {
+        for (Pos_t row{0}; row < height(); ++row) {
+            for (Pos_t col{0}; col < width(); ++col) {
                 char item = get_item(row, col);
                 outstr.push_back(item);
             }

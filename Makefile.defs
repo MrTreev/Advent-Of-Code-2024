@@ -38,7 +38,7 @@ ifeq (${CXXLIB}, stdc++)
 	CXXFLAGS	+=	-stdlib=libstdc++
 	LDFLAGS		+=	-lc
 	LDFLAGS		+=	-lstdc++
-	LDFLAGS		+=	-ltbb
+	#LDFLAGS		+=	-ltbb
 else
 	CXXFLAGS	+=	-stdlib=libc++
 	LDFLAGS		+=	-lc
