@@ -179,7 +179,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
                 got,
                 ans
             );
+        } else {
+            aoc::print("Part 1 Correct: {}", aoc::part1);
         }
+    } else {
+        aoc::print("No stored answer for part 1, give it a go");
     }
     if (part2_answer != 0) {
         if (aoc::part2 != part2_answer) {
@@ -191,6 +195,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
                 got,
                 ans
             );
+        } else {
+            aoc::print("Part 2 Correct");
         }
+    } else {
+        aoc::print("No stored answer for part 2, give it a go");
     }
 }

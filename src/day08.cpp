@@ -1,7 +1,7 @@
 #include "util.h"
 
 namespace {
-constexpr size_t AXIS_SIZE{12}; // 12 for test, 50 for full
+constexpr size_t AXIS_SIZE{50}; // 12 for test, 50 for full
 
 class Antenna {
     aoc::util::Coord m_pos;
@@ -126,14 +126,17 @@ make_all_antinodes(const std::vector<Antenna>& antennae, Roof& roof) {
 }
 
 void run_part_1(Roof roof) {
-    std::vector<Antenna>          antennae{roof.find_antennae()};
-    std::vector<aoc::util::Coord> antinodes{make_antinodes(antennae, roof)};
+    const std::vector<Antenna>          antennae{roof.find_antennae()};
+    const std::vector<aoc::util::Coord> antinodes{make_antinodes(antennae, roof)
+    };
     aoc::part1 = antinodes.size();
 }
 
 void run_part_2(Roof roof) {
-    std::vector<Antenna>          antennae{roof.find_antennae()};
-    std::vector<aoc::util::Coord> antinodes{make_all_antinodes(antennae, roof)};
+    const std::vector<Antenna>          antennae{roof.find_antennae()};
+    const std::vector<aoc::util::Coord> antinodes{
+        make_all_antinodes(antennae, roof)
+    };
     aoc::part2 = antinodes.size();
     aoc::print(std::string(roof));
 }
