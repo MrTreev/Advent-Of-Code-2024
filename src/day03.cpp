@@ -83,8 +83,6 @@ void run_part2(const std::string& line) {
             const size_t aval  = {std::stoul({str_ptr, sta + 1, sta_sep})};
             const size_t bval  = {std::stoul({str_ptr, sep + 1, sep_end})};
             const size_t mul   = {aval * bval};
-            //const std::string full_line = {str_ptr, idx, 5 + betwn.size()};
-            //aoc::debug(fmt_str, full_line, aval, bval, mul, aoc::part2);
             aoc::part2        += mul;
         }
         idx = get_next(line, idx);

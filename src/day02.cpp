@@ -44,11 +44,12 @@ bool subone_good(const std::vector<int>& vec) {
     if (all_good(vec)) {
         return true;
     }
-    for (size_t i = 1; i < vec.size(); ++i) {
-        if ((badtst(vec[i - 1], vec[i]))) {
-            if (all_good(vec_except(vec, i))) {
-                return true;
-            }
+    aoc::debug("trying: {}", vec);
+    for (size_t i = 0; i < vec.size(); ++i) {
+        const auto smolvec = vec_except(vec, i);
+        aoc::debug("smolvec: {}", smolvec);
+        if (all_good(smolvec)) {
+            return true;
         }
     }
     return false;
@@ -71,6 +72,7 @@ void aoc::run() {
             aoc::part1 += 1;
         }
         if (subone_good(items)) {
+            aoc::debug("{}", items);
             aoc::part2 += 1;
         }
     }

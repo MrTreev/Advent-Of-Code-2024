@@ -191,7 +191,7 @@ public:
 
 } // namespace
 
-void aoc::run() {
+void aoc::run() { // NOLINT(*-cognitive-complexity)
     std::ifstream    instream{aoc::file::day_stream()};
     const WordSearch wordsearch{instream};
 

@@ -3,13 +3,13 @@
 namespace day01 {
 const size_t part1 = 1'722'302;
 const size_t part2 = 20'373'490;
-const size_t test1 = 1'722'302;
-const size_t test2 = 20'373'490;
+const size_t test1 = 11;
+const size_t test2 = 31;
 } // namespace day01
 
 namespace day02 {
 const size_t part1 = 390;
-const size_t part2 = 0;
+const size_t part2 = 439;
 const size_t test1 = 2;
 const size_t test2 = 4;
 } // namespace day02
@@ -24,15 +24,15 @@ const size_t test2 = 63'866'497;
 namespace day04 {
 const size_t part1 = 2468;
 const size_t part2 = 1864;
-const size_t test1 = 0;
-const size_t test2 = 0;
+const size_t test1 = 18;
+const size_t test2 = 9;
 } // namespace day04
 
 namespace day05 {
 const size_t part1 = 5091;
 const size_t part2 = 0;
-const size_t test1 = 0;
-const size_t test2 = 0;
+const size_t test1 = 143;
+const size_t test2 = 123;
 } // namespace day05
 
 namespace day06 {
