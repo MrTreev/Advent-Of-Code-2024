@@ -1,47 +1,47 @@
 .EXPORT_ALL_VARIABLES:
 .DELETE_ON_ERROR:
 
-COMPILER	=	clang
 DEBUG       =   true
-CXXLIB		=	c++
-RTLIB		=	compiler-rt
 
-PROJECT		=	${PWD}
+PROJECT		=	.
 
 PATH_SRC	=	${PROJECT}/src
-PATH_ETC	=	${PROJECT}/etc
 PATH_TXT	=	${PROJECT}/txt
 PATH_OUT	=	${PROJECT}/out
-PATH_BLD	=	${PATH_OUT}/build
 PATH_BIN	=	${PATH_OUT}/bin
+PATH_LIB	=	${PATH_OUT}/lib
 PATH_DAT	=	${PATH_OUT}/test
-PATH_MAK	=	${PATH_ETC}/make
+
+CXX			=	clang++
+LD			=	clang++
 
 ifeq (${DEBUG}, true)
-    CXXFLAGS	+=	-g
-    CXXFLAGS	+=	-ggdb
+    TSTFLAGS	+=	-g
+    TSTFLAGS	+=	-ggdb
+    OPTFLAGS    +=  -UNDEBUG
 else
-    CXXFLAGS    +=  -0fast
+    OPTFLAGS    +=  -0fast
+    OPTFLAGS    +=  -DNDEBUG
 endif
 
-ifeq (${COMPILER}, clang)
-	include ${PATH_MAK}/clang.mk
-endif
-ifeq (${COMPILER}, gcc)
-	include ${PATH_MAK}/gcc.mk
-endif
-ifeq (${COMPILER}, tcc)
-	include ${PATH_MAK}/tcc.mk
-endif
+CXXFLAGS	+=	-std=c++26
+CXXFLAGS	+=	-iquote${PATH_SRC}
+CXXFLAGS	+=	-Weverything
+CXXFLAGS	+=	-pedantic
+CXXFLAGS	+=	-Wno-padded
+CXXFLAGS	+=	-Wno-c99-extensions
+CXXFLAGS	+=	-Wno-c99-compat
+CXXFLAGS	+=	-Wno-c++-compat
+CXXFLAGS	+=	-Wno-c++20-compat
+CXXFLAGS	+=	-Wno-c++98-compat
+CXXFLAGS	+=	-Wno-c++98-compat-pedantic
+CXXFLAGS	+=	-Wno-pre-c++20-compat-pedantic
+CXXFLAGS	+=	-Wno-pre-c++17-compat-pedantic
+CXXFLAGS	+=	-Wno-switch-default
+CXXFLAGS	+=	-fexperimental-library
 
-ifeq (${CXXLIB}, stdc++)
-	CXXFLAGS	+=	-stdlib=libstdc++
-	LDFLAGS		+=	-lc
-	LDFLAGS		+=	-lstdc++
-	LDFLAGS		+=	-ltbb
-else
-	CXXFLAGS	+=	-stdlib=libc++
-	LDFLAGS		+=	-lc
-	LDFLAGS		+=	-lc++
-	LDFLAGS		+=	-ltbb
-endif
+CXXFLAGS	+=	-stdlib=libc++
+LDFLAGS		+=	-L${PATH_LIB}
+LDFLAGS		+=	-lc
+LDFLAGS		+=	-lc++
+LDFLAGS		+=	-ltbb

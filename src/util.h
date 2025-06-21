@@ -36,23 +36,30 @@ using std::ptrdiff_t;
 using std::size_t;
 
 namespace aoc {
+constexpr bool test_mode =
+#if defined(NDEBUG)
+    false
+#else
+    true
+#endif
+    ;
+
 // NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
 extern std::atomic<size_t> part1;
 extern std::atomic<size_t> part2;
-extern std::atomic<bool>   test_mode;
-
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
 
 void run();
 void print(const std::string& str);
-void debug(const std::string& str);
 
 void print(std::string_view fst, auto&&... args) {
     print(std::string(std::vformat(fst, std::make_format_args(args...))));
 }
 
 void debug(std::string_view fst, auto&&... args) {
-    debug(std::string(std::vformat(fst, std::make_format_args(args...))));
+    if constexpr (test_mode) {
+        print(fst, std::forward<decltype(args)>(args)...);
+    }
 }
 
 bool in(auto item, const std::vector<decltype(item)>& vec) {

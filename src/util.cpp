@@ -7,7 +7,6 @@
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
 
-std::atomic<bool>   aoc::test_mode;
 std::atomic<size_t> aoc::part1{0};
 std::atomic<size_t> aoc::part2{0};
 
@@ -103,10 +102,7 @@ size_t get_part_2() { // NOLINT(*-cognitive-complexity)
 } // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
-    if (argc > 1) {
-        aoc::test_mode = true;
-    }
+int main() {
     aoc::run();
     print_part(1, aoc::part1, get_part_1());
     print_part(2, aoc::part2, get_part_2());
@@ -114,12 +110,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
 void aoc::print(const std::string& str) {
     std::println(std::cout, "{}", str);
-}
-
-void aoc::debug(const std::string& str) {
-    if (aoc::test_mode) {
-        std::println(std::cout, "{}", str);
-    }
 }
 
 std::string aoc::file::day_file(uint8_t day) {
