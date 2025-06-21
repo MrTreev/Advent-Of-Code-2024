@@ -1,6 +1,5 @@
 #include "util.h"
 #include <bitset>
-#include <climits>
 #include <cmath>
 #include <string>
 
@@ -75,8 +74,7 @@ void run_part_1(const std::vector<Operation>& operations) {
     }
 }
 
-void run_part_2() {
-}
+void run_part_2() {}
 
 } // namespace
 

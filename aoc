@@ -1,0 +1,80 @@
+#!/bin/sh
+set -eu
+
+get_aoc_page(){
+	wget \
+		--no-cookies \
+		--header "Cookie: session=${AOC_COOKIE}" \
+		--output-document "${2}" \
+		"https://adventofcode.com/${AOC_YEAR}/${1}";
+	unset page outfile;
+};
+
+get_day(){
+	dayno="${1}"
+	daystr="$(printf '%02d' "${dayno}")"
+	touch "${TEXTDIR}/test${daystr}.txt"
+	if [ ! -f "${TEXTDIR}/day${dayno}.txt" ]; then
+		get_aoc_page "day/${dayno}/input" "${TEXTDIR}/day${daystr}.txt";
+	fi
+	get_aoc_page "day/${dayno}" "${PAGEDIR}/day${daystr}.html" ;
+	unset dayno daystr;
+};
+
+run_get(){
+	if [ "${1}" = "all" ]; then
+		for day in $(seq 25); do
+			get_day "${day}";
+		done;
+	else
+		get_day "${1}";
+	fi
+};
+
+print_help(){
+	cat <<-ENDHELP >&2
+	aoc: Advent of Code CLI utility
+	    -h|--help               Prints this message
+	    -c|--cookie <COOKIE>    Set the session cookie
+	    -y|--year <YEAR>        Set the year
+	    get <DAY|all>           Get/update the files for a specific day, or all of them
+	ENDHELP
+};
+
+main(){
+	while [ $# -gt 0 ]; do
+		arg="${1}";
+		shift;
+		case "${arg}" in
+			-h|--help)
+				print_help;
+				exit 0;;
+			-c|--cookie)
+				AOC_COOKIE="${1?No option provided to --cookie}";
+				shift;;
+			-y|--year)
+				AOC_YEAR="${1?No option provided to --year}";
+				shift;;
+			get)
+				run_get "${@?No arguments given to get}";
+				shift;;
+			*)
+				printf 'invalid arg: "%s"\n' "${arg}";
+				exit 1;;
+		esac;
+	done;
+	unset arg;
+	[ -n "${AOC_COOKIE}" ] \
+		|| echo "Please set the AOC_COOKIE environment variable in .env or use the --cookie argument";
+	[ -n "${AOC_YEAR}" ] \
+		|| echo "Please set the AOC_YEAR environment variable in .env or use the --year argument";
+};
+
+###############################################################################
+# MAIN
+###############################################################################
+REPODIR="$(dirname "${0}")";
+TEXTDIR="${REPODIR}/txt";
+PAGEDIR="${REPODIR}/tasks";
+if [ -f "${REPODIR}/.env" ]; then . "${REPODIR}/.env"; fi;
+main "$@";

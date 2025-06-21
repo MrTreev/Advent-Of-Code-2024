@@ -1,11 +1,11 @@
 #include "util.h"
 
 namespace {
-constexpr size_t AXIS_SIZE{50}; // 12 for test, 50 for full
+using aoc::util::Coord;
 
 class Antenna {
-    aoc::util::Coord m_pos;
-    char             m_freq;
+    Coord m_pos;
+    char  m_freq;
 
 public:
     Antenna(size_t row, size_t col, char freq)
@@ -13,7 +13,7 @@ public:
         , m_freq(freq) {}
 
     [[nodiscard]]
-    const aoc::util::Coord& pos() const {
+    const Coord& pos() const {
         return m_pos;
     }
 
@@ -22,30 +22,32 @@ public:
         return m_freq;
     }
 
+    bool operator!=(const Antenna& other) const {
+        return (m_pos != other.m_pos);
+    }
+
     explicit operator std::string() const {
         return std::format("[{}: {}]", std::string(m_pos), m_freq);
     }
 };
 
-class Roof: public aoc::util::Grid<AXIS_SIZE, AXIS_SIZE> {
-    using Grid = aoc::util::Grid<AXIS_SIZE, AXIS_SIZE>;
-
+class Roof: public aoc::util::Grid {
 public:
     explicit Roof(std::ifstream& infile)
-        : Grid(infile) {}
+        : Grid(infile, aoc::test_mode ? 12U : 50U) {} // NOLINT(*-magic-numbers)
 
-    void anti(aoc::util::Coord pos) {
-        get_mut(pos.row(), pos.col()) = '#';
+    void anti(Coord pos) {
+        (*this)[pos.x(), pos.y()] = '#';
     }
 
     [[nodiscard]]
     std::vector<Antenna> find_antennae() const {
         std::vector<Antenna> antennae{};
-        for (size_t row{0}; row < Roof::height(); ++row) {
-            for (size_t col{0}; col < Roof::width(); ++col) {
-                const char cha = get_item(row, col);
+        for (size_t ypos{0}; ypos < height(); ++ypos) {
+            for (size_t xpos{0}; xpos < width(); ++xpos) {
+                const char cha = (*this)[xpos, ypos];
                 if (cha != '.') {
-                    antennae.emplace_back(row, col, cha);
+                    antennae.emplace_back(xpos, ypos, cha);
                 }
             }
         }
@@ -54,91 +56,73 @@ public:
 };
 
 void check_antinode(
-    std::vector<aoc::util::Coord>& antinodes,
-    const Antenna&                 first_antenna,
-    const Antenna&                 second_antenna,
-    Roof&                          roof
+    std::vector<Coord>& antinodes,
+    const Antenna&      first_antenna,
+    const Antenna&      second_antenna,
+    Roof&               roof
 ) {
-    const aoc::util::Coord anti =
+    const Coord anti =
         first_antenna.pos() + (first_antenna.pos() - second_antenna.pos());
-    if ((first_antenna.freq() == second_antenna.freq())
-        && (first_antenna.pos() != second_antenna.pos()) && Roof::check(anti)
-        && (!aoc::in(anti, antinodes))) {
-        aoc::print(
-            "{}: {}, {}",
-            std::string(anti),
-            std::string(first_antenna),
-            std::string(second_antenna)
-        );
+    if (roof.check(anti) && !aoc::in(anti, antinodes)) {
         antinodes.emplace_back(anti);
         roof.anti(anti);
     }
-}
-
-std::vector<aoc::util::Coord>
-make_antinodes(const std::vector<Antenna>& antennae, Roof& roof) {
-    std::vector<aoc::util::Coord> antinodes{};
-    for (const Antenna& ant1: antennae) {
-        for (const Antenna& ant2: antennae) {
-            check_antinode(antinodes, ant1, ant2, roof);
-            check_antinode(antinodes, ant2, ant1, roof);
-        }
-    }
-    return antinodes;
 }
 
 void check_all_antinodes(
-    std::vector<aoc::util::Coord>& antinodes,
-    const Antenna&                 first_antenna,
-    const Antenna&                 second_antenna,
-    Roof&                          roof
+    std::vector<Coord>& antinodes,
+    const Antenna&      first_antenna,
+    const Antenna&      second_antenna,
+    Roof&               roof
 ) {
-    const aoc::util::Coord mult = (first_antenna.pos() - second_antenna.pos());
-    aoc::util::Coord       anti = first_antenna.pos() + mult;
-    while (true) {
-        if (!((first_antenna.freq() == second_antenna.freq())
-              && (first_antenna.pos() != second_antenna.pos())
-              && Roof::check(anti) && (!aoc::in(anti, antinodes)))) {
-            return;
+    const Coord move = (first_antenna.pos() - second_antenna.pos());
+    Coord       anti = first_antenna.pos();
+    while (roof.check(anti)) {
+        if (!aoc::in(anti, antinodes)) {
+            aoc::debug(
+                "{}: {} - {}, {}",
+                second_antenna.freq(),
+                std::string(anti),
+                std::string(first_antenna.pos()),
+                std::string(second_antenna.pos())
+            );
+            antinodes.emplace_back(anti);
+            roof.anti(anti);
         }
-        aoc::print(
-            "{}: {}, {}",
-            std::string(anti),
-            std::string(first_antenna),
-            std::string(second_antenna)
-        );
-        antinodes.emplace_back(anti);
-        roof.anti(anti);
-        anti += mult;
+        anti += move;
     }
-}
-
-std::vector<aoc::util::Coord>
-make_all_antinodes(const std::vector<Antenna>& antennae, Roof& roof) {
-    std::vector<aoc::util::Coord> antinodes{};
-    for (const Antenna& ant1: antennae) {
-        for (const Antenna& ant2: antennae) {
-            check_all_antinodes(antinodes, ant1, ant2, roof);
-            check_all_antinodes(antinodes, ant2, ant1, roof);
-        }
-    }
-    return antinodes;
 }
 
 void run_part_1(Roof roof) {
-    const std::vector<Antenna>          antennae{roof.find_antennae()};
-    const std::vector<aoc::util::Coord> antinodes{make_antinodes(antennae, roof)
-    };
+    const std::vector<Antenna> antennae{roof.find_antennae()};
+    std::vector<Coord>         antinodes{};
+    for (const Antenna& ant1: antennae) {
+        for (const Antenna& ant2: antennae) {
+            if (ant1.freq() == ant2.freq() && ant1 != ant2) {
+                check_antinode(antinodes, ant1, ant2, roof);
+                check_antinode(antinodes, ant2, ant1, roof);
+            }
+        }
+    }
     aoc::part1 = antinodes.size();
 }
 
 void run_part_2(Roof roof) {
-    const std::vector<Antenna>          antennae{roof.find_antennae()};
-    const std::vector<aoc::util::Coord> antinodes{
-        make_all_antinodes(antennae, roof)
-    };
+    const std::vector<Antenna> antennae{roof.find_antennae()};
+    std::vector<Coord>         antinodes{};
+    for (const Antenna& antenna: antennae) {
+        aoc::debug(std::string(antenna));
+    }
+    for (const Antenna& ant1: antennae) {
+        for (const Antenna& ant2: antennae) {
+            if (ant1.freq() == ant2.freq() && ant1 != ant2) {
+                check_all_antinodes(antinodes, ant1, ant2, roof);
+                check_all_antinodes(antinodes, ant2, ant1, roof);
+            }
+        }
+    }
     aoc::part2 = antinodes.size();
-    aoc::print(std::string(roof));
+    aoc::debug(std::string(roof));
 }
 
 } // namespace
@@ -146,7 +130,7 @@ void run_part_2(Roof roof) {
 void aoc::run() {
     std::ifstream instream{aoc::file::day_stream()};
     const Roof    roof{instream};
-    aoc::print(std::string(roof));
+    aoc::debug(std::string(roof));
     run_part_1(roof);
     run_part_2(roof);
 }

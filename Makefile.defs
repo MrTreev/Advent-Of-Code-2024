@@ -38,16 +38,10 @@ ifeq (${CXXLIB}, stdc++)
 	CXXFLAGS	+=	-stdlib=libstdc++
 	LDFLAGS		+=	-lc
 	LDFLAGS		+=	-lstdc++
-	#LDFLAGS		+=	-ltbb
+	LDFLAGS		+=	-ltbb
 else
 	CXXFLAGS	+=	-stdlib=libc++
 	LDFLAGS		+=	-lc
 	LDFLAGS		+=	-lc++
 	LDFLAGS		+=	-ltbb
 endif
-
-# ifeq (${RTLIB}, compiler-rt)
-# 	CXXFLAGS	+=	-rtlib=compiler-rt
-# else
-# 	CXXFLAGS	+=	-rtlib=libgcc
-# endif

@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <format>
 #include <fstream>
+#include <mdspan>
 #include <source_location>
 #include <sstream> // IWYU pragma: keep
 #include <string>
@@ -67,10 +68,6 @@ std::filesystem::path
 day_stream(const std::source_location& loc = std::source_location::current());
 } // namespace file
 
-namespace output {
-void print_part(uint8_t num, const size_t& part);
-} // namespace output
-
 namespace string {
 std::string slurp(std::ifstream& instr);
 
@@ -82,8 +79,8 @@ uint8_t char_to_uint(char cha_1, char cha_2);
 namespace math {
 size_t max(size_t aval, size_t bval);
 size_t min(size_t aval, size_t bval);
-size_t max(size_t aval, size_t bval, size_t args...);
-size_t min(size_t aval, size_t bval, size_t args...);
+size_t max(size_t aval, size_t bval, size_t args, ...);
+size_t min(size_t aval, size_t bval, size_t args, ...);
 } // namespace math
 
 namespace types {
@@ -98,166 +95,69 @@ std::string type_name(auto item) {
 
 namespace util {
 enum class Direction : uint8_t { N, E, S, W };
+std::string to_string(Direction dir);
 
-inline std::string to_string(Direction dir) {
-    switch (dir) {
-    case Direction::N: return "N";
-    case Direction::E: return "S";
-    case Direction::S: return "E";
-    case Direction::W: return "W";
-    }
-};
-
-template<typename Pos_t = size_t>
-class Coordinate {
-    Pos_t m_xpos;
-    Pos_t m_ypos;
+class Coord {
+    size_t m_xpos;
+    size_t m_ypos;
 
 public:
-    constexpr Coordinate(Pos_t xpos, Pos_t ypos)
-        : m_xpos(xpos)
-        , m_ypos(ypos) {}
-
+    Coord(size_t xpos, size_t ypos);
     [[nodiscard]]
-    Pos_t x() const {
-        return m_xpos;
-    }
-
+    size_t x() const;
     [[nodiscard]]
-    Pos_t y() const {
-        return m_ypos;
-    }
-
-    explicit operator std::string() const {
-        return std::format("({}, {})", x(), y());
-    }
-
-    Coordinate operator+(const Direction& dir) const {
-        switch (dir) {
-        case Direction::N: return {m_xpos - 1, m_ypos};
-        case Direction::E: return {m_xpos, m_ypos + 1};
-        case Direction::S: return {m_xpos + 1, m_ypos};
-        case Direction::W: return {m_xpos, m_ypos - 1};
-        }
-    }
-
-    bool operator<=>(const Coordinate& other) const = default;
-
-    Coordinate operator-(const Coordinate& other) const {
-        return {m_xpos - other.m_xpos, m_ypos - other.m_ypos};
-    }
-
-    Coordinate operator+(const Coordinate& other) const {
-        return {m_xpos + other.m_xpos, m_ypos + other.m_ypos};
-    }
-
-    Coordinate operator*(const Pos_t& other) const {
-        return {m_xpos * other, m_ypos * other};
-    }
-
-    Coordinate operator*(const Coordinate& other) const {
-        return {m_xpos * other.m_xpos, m_ypos * other.m_ypos};
-    }
-
-    void operator-=(const Coordinate& other) {
-        m_xpos -= other.m_xpos;
-        m_ypos -= other.m_ypos;
-    }
-
-    void operator+=(const Coordinate& other) {
-        m_xpos += other.m_xpos;
-        m_ypos += other.m_ypos;
-    }
-
-    void operator/=(const Coordinate& other) {
-        m_xpos /= other.m_xpos;
-        m_ypos /= other.m_ypos;
-    }
-
-    void operator*=(const Coordinate& other) {
-        m_xpos *= other.m_xpos;
-        m_ypos *= other.m_ypos;
-    }
+    size_t   y() const;
+    explicit operator std::string() const;
+    bool     operator<=>(const Coord& other) const = default;
+    Coord    operator+(const Direction& dir) const;
+    Coord    operator-(const Coord& other) const;
+    Coord    operator+(const Coord& other) const;
+    Coord    operator*(const size_t& other) const;
+    Coord    operator*(const Coord& other) const;
+    void     operator-=(const Coord& other);
+    void     operator+=(const Coord& other);
+    void     operator/=(const Coord& other);
+    void     operator*=(const Coord& other);
 };
 
-using Coord = Coordinate<size_t>;
-
-template<size_t AX_ROWS, size_t AX_COLS, typename Pos_t = size_t>
 class Grid {
-    static constexpr Pos_t           WIDTH{AX_COLS};
-    static constexpr Pos_t           HEIGHT{AX_ROWS};
-    std::array<char, HEIGHT * WIDTH> m_buffer{0};
-
-protected:
-    static Pos_t idx(Pos_t row, Pos_t col) {
-        if (row >= height()) {
-            throw std::runtime_error(
-                std::format("row {} out of bounds, max: {}", row, height())
-            );
-        }
-        if (col >= width()) {
-            throw std::runtime_error(
-                std::format("col {} out of bounds, max: {}", col, width())
-            );
-        }
-        return (row * WIDTH) + col;
-    }
-
-    char& get_mut(Pos_t row, Pos_t col) {
-        return m_buffer[idx(row, col)]; // NOLINT
-    }
+private:
+    size_t                                      m_width{0};
+    size_t                                      m_height{0};
+    std::vector<char>                           m_buffer;
+    std::mdspan<char, std::dextents<size_t, 2>> m_mdspan;
 
 public:
-    explicit Grid(std::ifstream& infile) {
-        std::string line;
-        for (size_t row{0}; row < height(); ++row) {
-            std::getline(infile, line);
-            for (size_t col{0}; col < width(); ++col) {
-                get_mut(row, col) = line[col];
-            }
-        }
-    }
-
+    explicit Grid() = default;
+    explicit Grid(size_t len);
+    explicit Grid(size_t width, size_t height);
+    explicit Grid(std::ifstream& infile, size_t len);
+    Grid(const Grid& other);
+    Grid(Grid&& other) noexcept;
+    Grid& operator=(const Grid&) = default;
+    Grid& operator=(Grid&&)      = default;
+    ~Grid()                      = default;
+    explicit operator std::string() const;
+    auto&&   operator[](this auto&& self, size_t xpos, size_t ypos);
+    auto&&   operator[](this auto&& self, Coord pos);
     [[nodiscard]]
-    constexpr size_t size() const {
-        return m_buffer.size();
-    }
-
+    size_t width() const;
     [[nodiscard]]
-    const char& get_item(Pos_t row, Pos_t col) const {
-        return m_buffer[idx(row, col)]; // NOLINT
-    }
-
+    size_t height() const;
     [[nodiscard]]
-    static bool check(Pos_t row, Pos_t col) {
-        return (row < height() && col < width());
-    }
-
+    size_t elements() const;
     [[nodiscard]]
-    static bool check(const Coordinate<Pos_t>& pos) {
-        return (pos.row() < height() && pos.col() < width());
-    }
-
-    static constexpr Pos_t width() {
-        return WIDTH;
-    }
-
-    static constexpr Pos_t height() {
-        return HEIGHT;
-    }
-
-    explicit operator std::string() const {
-        std::string outstr{};
-        for (Pos_t row{0}; row < height(); ++row) {
-            for (Pos_t col{0}; col < width(); ++col) {
-                char item = get_item(row, col);
-                outstr.push_back(item);
-            }
-            outstr.push_back('\n');
-        }
-        return outstr;
-    }
+    bool check(Coord pos) const;
 };
+
+inline auto&& Grid::operator[](this auto&& self, size_t xpos, size_t ypos) {
+    return self.m_mdspan[ypos, xpos];
+}
+
+inline auto&& Grid::operator[](this auto&& self, Coord pos) {
+    return self[pos.x(), pos.y()];
+}
+
 } // namespace util
 
 } // namespace aoc
