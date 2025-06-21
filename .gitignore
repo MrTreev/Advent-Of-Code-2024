@@ -18,9 +18,10 @@
 *.slo
 *.smod
 *.so
-
-/out/
+/.cache/
 /compile_commands.json
-.cache/
-/txt/*
+/out/
+/tasks/
+/txt/
+
 !/txt/get_text.sh

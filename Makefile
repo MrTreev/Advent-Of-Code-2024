@@ -1,5 +1,11 @@
 .EXPORT_ALL_VARIABLES:
 include Makefile.defs
+SRC_FILES	=	$(shell find ${PATH_SRC} -type f -name '*.cpp')
+DAY_FILES	=	$(shell find ${PATH_SRC} -type f -name 'day*.cpp')
+BLD_FILES	=	$(patsubst ${PATH_SRC}/%.cpp,${PATH_BLD}/%.o,${SRC_FILES})
+BIN_FILES	=	$(patsubst ${PATH_SRC}/%.cpp,${PATH_BIN}/%,${DAY_FILES})
+TXT_FILES	=	$(patsubst ${PATH_SRC}/%.cpp,${PATH_TXT}/%.txt,${DAY_FILES})
+DAT_FILES	=	$(patsubst ${PATH_SRC}/%.cpp,${PATH_DAT}/%.txt,${DAY_FILES}) ${PATH_DAT}/test06.txt
 
 .PHONY: all
 all: text ${BIN_FILES}
@@ -18,6 +24,7 @@ ${DAT_FILES}: ${PATH_DAT}/%: ${PATH_TXT}/%
 	@mkdir -p $(dir $@)
 	@cp $< $@
 
+
 .PHONY: clean
 clean:
 	@rm -rf ${PATH_OUT}
@@ -27,7 +34,7 @@ run%: ${PATH_BIN}/day% ${PATH_DAT}/day%.txt
 	$<
 
 .PHONY: $(BIN_FILES:${PATH_BIN}/%=test%)
-test%: ${PATH_BIN}/day% ${PATH_DAT}/day%.txt
+test%: ${PATH_BIN}/day% ${PATH_DAT}/test%.txt
 	$< test
 
 .PHONY: echo

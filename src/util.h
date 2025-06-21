@@ -1,8 +1,6 @@
 #pragma once
 #include <algorithm>
-#include <atomic>
 #include <cassert>
-#include <cstdarg>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -11,6 +9,7 @@
 #include <format>
 #include <fstream>
 #include <source_location>
+#include <sstream> // IWYU pragma: keep
 #include <string>
 #include <typeinfo>
 #include <vector>
@@ -64,7 +63,7 @@ bool in(auto item, const std::vector<decltype(item)>& vec) {
 namespace file {
 std::string           day_file(uint8_t day);
 std::filesystem::path day_path(uint8_t day);
-std::ifstream
+std::filesystem::path
 day_stream(const std::source_location& loc = std::source_location::current());
 } // namespace file
 
@@ -73,7 +72,7 @@ void print_part(uint8_t num, const size_t& part);
 } // namespace output
 
 namespace string {
-std::string slurp(std::ifstream instr);
+std::string slurp(std::ifstream& instr);
 
 bool    is_numeric(const std::string& str);
 uint8_t char_to_uint(char cha);
@@ -98,84 +97,86 @@ std::string type_name(auto item) {
 } // namespace types
 
 namespace util {
+enum class Direction : uint8_t { N, E, S, W };
+
+inline std::string to_string(Direction dir) {
+    switch (dir) {
+    case Direction::N: return "N";
+    case Direction::E: return "S";
+    case Direction::S: return "E";
+    case Direction::W: return "W";
+    }
+};
+
 template<typename Pos_t = size_t>
 class Coordinate {
-    Pos_t m_row;
-    Pos_t m_col;
+    Pos_t m_xpos;
+    Pos_t m_ypos;
 
 public:
-    constexpr Coordinate(Pos_t row, Pos_t col)
-        : m_row(row)
-        , m_col(col) {}
+    constexpr Coordinate(Pos_t xpos, Pos_t ypos)
+        : m_xpos(xpos)
+        , m_ypos(ypos) {}
 
     [[nodiscard]]
-    Pos_t row() const {
-        return m_row;
+    Pos_t x() const {
+        return m_xpos;
     }
 
     [[nodiscard]]
-    Pos_t col() const {
-        return m_col;
+    Pos_t y() const {
+        return m_ypos;
     }
 
     explicit operator std::string() const {
-        return std::format("({}, {})", row(), col());
+        return std::format("({}, {})", x(), y());
     }
 
-    bool operator==(const Coordinate& other) const {
-        return (row() == other.row() && col() == other.col());
+    Coordinate operator+(const Direction& dir) const {
+        switch (dir) {
+        case Direction::N: return {m_xpos - 1, m_ypos};
+        case Direction::E: return {m_xpos, m_ypos + 1};
+        case Direction::S: return {m_xpos + 1, m_ypos};
+        case Direction::W: return {m_xpos, m_ypos - 1};
+        }
     }
 
-    bool operator>(const Coordinate& other) const {
-        return (row() > other.row() && col() > other.col());
-    }
-
-    bool operator<(const Coordinate& other) const {
-        return (row() < other.row() && col() < other.col());
-    }
-
-    bool operator>=(const Coordinate& other) const {
-        return (row() >= other.row() && col() >= other.col());
-    }
-
-    bool operator<=(const Coordinate& other) const {
-        return (row() <= other.row() && col() <= other.col());
-    }
+    bool operator<=>(const Coordinate& other) const = default;
 
     Coordinate operator-(const Coordinate& other) const {
-        return {m_row - other.m_row, m_col - other.m_col};
+        return {m_xpos - other.m_xpos, m_ypos - other.m_ypos};
     }
 
     Coordinate operator+(const Coordinate& other) const {
-        return {m_row + other.m_row, m_col + other.m_col};
+        return {m_xpos + other.m_xpos, m_ypos + other.m_ypos};
     }
 
     Coordinate operator*(const Pos_t& other) const {
-        return {m_row * other, m_col * other};
+        return {m_xpos * other, m_ypos * other};
     }
 
     Coordinate operator*(const Coordinate& other) const {
-        return {m_row * other.m_row, m_col * other.m_col};
+        return {m_xpos * other.m_xpos, m_ypos * other.m_ypos};
     }
 
     void operator-=(const Coordinate& other) {
-        m_row -= other.m_row;
-        m_col -= other.m_col;
+        m_xpos -= other.m_xpos;
+        m_ypos -= other.m_ypos;
     }
 
     void operator+=(const Coordinate& other) {
-        m_row += other.m_row;
-        m_col += other.m_col;
+        m_xpos += other.m_xpos;
+        m_ypos += other.m_ypos;
     }
 
     void operator/=(const Coordinate& other) {
-        m_row /= other.m_row;
-        m_col /= other.m_col;
+        m_xpos /= other.m_xpos;
+        m_ypos /= other.m_ypos;
     }
 
     void operator*=(const Coordinate& other) {
-        m_row *= other.m_row;
-        m_col *= other.m_col;
+        m_xpos *= other.m_xpos;
+        m_ypos *= other.m_ypos;
     }
 };
 

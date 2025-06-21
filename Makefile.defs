@@ -3,7 +3,7 @@
 
 COMPILER	=	clang
 DEBUG       =   true
-CXXLIB		=	stdc++
+CXXLIB		=	c++
 RTLIB		=	compiler-rt
 
 PROJECT		=	${PWD}
@@ -51,10 +51,3 @@ endif
 # else
 # 	CXXFLAGS	+=	-rtlib=libgcc
 # endif
-
-SRC_FILES	=	$(shell find ${PATH_SRC} -type f -name '*.cpp')
-DAY_FILES	=	$(shell find ${PATH_SRC} -type f -name 'day*.cpp')
-BLD_FILES	=	$(patsubst ${PATH_SRC}/%.cpp,${PATH_BLD}/%.o,${SRC_FILES})
-BIN_FILES	=	$(patsubst ${PATH_SRC}/%.cpp,${PATH_BIN}/%,${DAY_FILES})
-TXT_FILES	=	$(patsubst ${PATH_SRC}/%.cpp,${PATH_TXT}/%.txt,${DAY_FILES})
-DAT_FILES	=	$(patsubst ${PATH_SRC}/%.cpp,${PATH_DAT}/%.txt,${DAY_FILES})

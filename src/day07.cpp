@@ -71,11 +71,12 @@ void run_part_1(const std::vector<Operation>& operations) {
     for (const Operation& operation: operations) {
         const bool works  = operate(operation);
         aoc::part1       += static_cast<size_t>(works) * operation.result();
-        aoc::print("total: {}, operation: {}", works, std::string(operation));
+        aoc::debug("total: {}, operation: {}", works, std::string(operation));
     }
 }
 
-void run_part_2() {}
+void run_part_2() {
+}
 
 } // namespace
 

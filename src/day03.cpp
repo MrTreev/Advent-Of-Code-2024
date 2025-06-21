@@ -1,5 +1,6 @@
 #include "util.h"
 #include <algorithm>
+#include <fstream>
 
 namespace {
 const std::string_view fmt_str{"| {:<12} | {:>3} | {:>3} | {:>8} | {:>10} |"};
@@ -97,7 +98,8 @@ void run_part2(const std::string& line) {
 
 void aoc::run() {
     aoc::debug(fmt_str, "Parsed", "a", "b", "Result", "Total");
-    const std::string full_file = aoc::string::slurp(aoc::file::day_stream());
+    std::ifstream     daystr{aoc::file::day_stream()};
+    const std::string full_file = aoc::string::slurp(daystr);
     run_part1(full_file);
     run_part2(full_file);
 }

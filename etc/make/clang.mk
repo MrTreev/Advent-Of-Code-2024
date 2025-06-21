@@ -3,7 +3,7 @@
 CXX			=	clang++
 LD			=	clang++
 
-CXXFLAGS	+=	-std=c++23
+CXXFLAGS	+=	-std=c++26
 CXXFLAGS	+=	-iquote${PATH_SRC}
 CXXFLAGS	+=	-Weverything
 CXXFLAGS	+=	-pedantic
@@ -17,3 +17,4 @@ CXXFLAGS	+=	-Wno-c++98-compat-pedantic
 CXXFLAGS	+=	-Wno-pre-c++20-compat-pedantic
 CXXFLAGS	+=	-Wno-pre-c++17-compat-pedantic
 CXXFLAGS	+=	-Wno-switch-default
+CXXFLAGS	+=	-fexperimental-library

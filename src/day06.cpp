@@ -1,129 +1,66 @@
 #include "util.h"
-#include <execution>
-#include <numeric>
+#include <mdspan>
+#include <ranges>
 #include <stdexcept>
 
 namespace {
-constexpr size_t AXIS_SIZE{130}; // 10 for test, 130 for full
-enum class Direction : uint8_t { N, E, S, W };
+constexpr size_t AXIS_SIZE{10}; // 10 for test, 130 for full
 
-std::string to_string(Direction dir) {
-    switch (dir) {
-    case Direction::N: return "N";
-    case Direction::E: return "S";
-    case Direction::S: return "E";
-    case Direction::W: return "W";
-    }
-};
+using Coordinate = aoc::util::Coordinate<size_t>;
+using aoc::util::Direction;
 
-class Coordinate {
-    size_t m_row;
-    size_t m_col;
-
-public:
-    constexpr Coordinate(size_t row, size_t col)
-        : m_row(row)
-        , m_col(col) {}
-
-    Coordinate operator+(const Direction& dir) const {
-        switch (dir) {
-        case Direction::N: return {m_row - 1, m_col};
-        case Direction::E: return {m_row, m_col + 1};
-        case Direction::S: return {m_row + 1, m_col};
-        case Direction::W: return {m_row, m_col - 1};
-        }
-    }
-
-    explicit operator std::string() const {
-        return std::format("({}, {})", m_row, m_col);
-    }
-
-    [[nodiscard]]
-    bool in_range() const {
-        return ((m_row < AXIS_SIZE) && (m_col < AXIS_SIZE));
-    }
-
-    [[nodiscard]]
-    size_t x() const {
-        return m_row;
-    }
-
-    [[nodiscard]]
-    size_t y() const {
-        return m_col;
-    }
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-member-function"
-    bool operator==(const Coordinate& other) const = default;
-#pragma clang diagnostic pop
-};
+[[nodiscard]]
+bool in_range(Coordinate pos) {
+    return ((pos.x() < AXIS_SIZE) && (pos.y() < AXIS_SIZE));
+}
 
 class Map {
 private:
-    static constexpr size_t          WIDTH{AXIS_SIZE};
-    static constexpr size_t          HEIGHT{AXIS_SIZE};
-    std::array<char, HEIGHT * WIDTH> m_buffer{0};
+    static constexpr size_t                                WIDTH{AXIS_SIZE};
+    static constexpr size_t                                HEIGHT{AXIS_SIZE};
+    std::array<char, (WIDTH * HEIGHT)>                     m_buffer{0};
+    std::mdspan<char, std::extents<size_t, WIDTH, HEIGHT>> m_mdspan;
 
-    static size_t idx(size_t row, size_t col) {
-        if (row >= height()) {
-            throw std::runtime_error(
-                std::format("row {} out of bounds, max: {}", row, height())
-            );
-        }
-        if (col >= width()) {
-            throw std::runtime_error(
-                std::format("col {} out of bounds, max: {}", col, width())
-            );
-        }
-        return (row * WIDTH) + col;
-    }
-
-    char& get_mut(size_t row, size_t col) {
-        return m_buffer[idx(row, col)]; // NOLINT
+    auto&& get_item(this auto&& self, const size_t& xpos, const size_t& ypos) {
+        return self.m_mdspan[ypos, xpos];
     }
 
 public:
-    explicit Map(std::ifstream& infile) {
+    explicit Map(std::ifstream& infile)
+        : m_buffer({})
+        , m_mdspan(m_buffer.data(), WIDTH, HEIGHT) {
         std::string line;
         for (size_t row{0}; row < height(); ++row) {
             std::getline(infile, line);
             for (size_t col{0}; col < width(); ++col) {
-                get_mut(row, col) = line[col];
+                get_item(row, col) = line[col];
             }
         }
     }
+
+    Map(const Map& other)
+        : m_buffer(other.m_buffer)
+        , m_mdspan(m_buffer.data(), WIDTH, HEIGHT) {}
+
+    Map(Map&& other)           = delete;
+    Map& operator=(const Map&) = default;
+    Map& operator=(Map&&)      = delete;
 
     Map(const Map& other, size_t idx)
         : Map(other) {
         block(idx);
     }
 
-    void block(const size_t idx) {
-        m_buffer[idx] = '#'; // NOLINT(*-array-index)
+    void block(size_t idx) {
+        m_buffer[idx] = '#'; // NOLINT(*-constant-array-index)
     }
 
-    [[nodiscard]]
-    const char& get_item(size_t row, size_t col) const {
-        return m_buffer[idx(row, col)]; // NOLINT
+    auto&& operator[](this auto&& self, size_t xpos, size_t ypos) {
+        return self.get_item(xpos, ypos);
     }
 
-    [[nodiscard]]
-    constexpr size_t size() const {
-        return m_buffer.size();
-    }
-
-    [[nodiscard]]
-    const char& get_item(const Coordinate& coord) const {
-        return m_buffer[idx(coord.x(), coord.y())]; // NOLINT
-    }
-
-    static constexpr size_t width() {
-        return WIDTH;
-    }
-
-    static constexpr size_t height() {
-        return HEIGHT;
+    auto&& operator[](this auto&& self, Coordinate pos) {
+        return self.get_item(pos.x(), pos.y());
     }
 
     explicit operator std::string() const {
@@ -137,23 +74,45 @@ public:
         }
         return outstr;
     }
+
+    [[nodiscard]]
+    static constexpr size_t width() {
+        return WIDTH;
+    }
+
+    [[nodiscard]]
+    static constexpr size_t height() {
+        return HEIGHT;
+    }
+
+    [[nodiscard]]
+    static constexpr size_t elements() {
+        return WIDTH * HEIGHT;
+    }
 };
 
 class Guard {
     Direction  m_facing{Direction::N};
     Coordinate m_position{0, 0};
+    Coordinate m_initial{0, 0};
 
 public:
     explicit Guard(const Map& map) {
         for (size_t row{0}; row < Map::height(); ++row) {
             for (size_t col{0}; col < Map::width(); ++col) {
-                if (map.get_item(row, col) == '^') {
+                if (map[row, col] == '^') {
                     m_position = {row, col};
+                    m_initial  = {row, col};
                     return;
                 }
             }
         }
         throw std::runtime_error("AAAA");
+    }
+
+    void reset() {
+        m_position = m_initial;
+        m_facing   = Direction::N;
     }
 
     void turn() {
@@ -165,8 +124,10 @@ public:
         }
     }
 
+    bool operator==(const Guard&) const = default;
+
     void next(const Map& map) {
-        if (map.get_item(m_position + m_facing) == '#') {
+        if (map[m_position + m_facing] == '#') {
             turn();
         } else {
             m_position = (m_position + m_facing);
@@ -176,29 +137,18 @@ public:
     [[nodiscard]]
     bool check_next() const {
         const Coordinate next_pos = (m_position + m_facing);
-        return next_pos.in_range();
+        return in_range(next_pos);
     }
 
     [[nodiscard]]
     const Coordinate& position() const {
         return m_position;
     }
-
-    [[nodiscard]]
-    explicit operator std::string() const {
-        return std::format(
-            "{}: {}",
-            std::string(m_position),
-            to_string(m_facing)
-        );
-    }
 };
 
-void run_part_1(Map map, const Guard& inguard) {
+void run_part_1(const Map& map, Guard guard) {
     std::vector<Coordinate> coords{};
-    Guard                   guard{inguard};
     coords.push_back(guard.position());
-
     while (guard.check_next()) {
         guard.next(map);
         if (!aoc::in(guard.position(), coords)) {
@@ -208,36 +158,27 @@ void run_part_1(Map map, const Guard& inguard) {
     aoc::part1 = coords.size();
 }
 
-bool run_iter(Guard guard, Map inmap, size_t idx) {
-    std::vector<std::string> items{};
-    const Map                map{inmap, idx};
-    while (guard.check_next()) {
-        guard.next(map);
-        const std::string g_item{guard};
-        if (aoc::in(g_item, items)) {
-            aoc::debug("found loop at {}", idx);
-            return true;
-        }
-        items.emplace_back(g_item);
-    }
-    aoc::debug("found no loop at {}", idx);
-    return false;
-}
-
-void run_part_2(Map map, const Guard& inguard) {
-    const Guard guard{inguard};
+void run_part_2(const Map& map, const Guard& inguard) {
+    Guard guard{inguard};
     aoc::debug("");
-    std::vector<size_t> indexs(map.size());
-    std::vector<bool>   items(map.size());
-    std::ranges::iota(indexs, 0);
-    std::for_each(
-        std::execution::par_unseq,
-        indexs.begin(),
-        indexs.end(),
-        [&](size_t idx) { items[idx] = run_iter(guard, map, idx); }
-    );
-    aoc::part2 =
-        static_cast<size_t>(std::count(items.begin(), items.end(), true));
+    size_t count{0};
+    for (const size_t idx: std::views::iota(0ULL, Map::elements())) {
+        std::vector<Guard> values{};
+        const Map          lmap{map, idx};
+        aoc::debug("Running\n{}", std::string(lmap));
+        while (guard.check_next()) {
+            guard.next(lmap);
+            if (aoc::in(guard, values)) {
+                aoc::debug("found loop at {}", idx);
+                count++;
+                break;
+            }
+            values.emplace_back(guard);
+        }
+        guard.reset();
+        aoc::debug("found no loop at {}", idx);
+    }
+    aoc::part2 = count;
 }
 
 } // namespace
